@@ -1,0 +1,10 @@
+{
+  "name": "RecExplo",
+  "version": "0.16.0",
+  "factorio_version": "0.16",
+  "title": "Recipe Explorer",
+  "description": "easy way to charge thru recipes",
+  "author": "",
+  "contact": "",
+  "dependencies": [ "base >= 0.16.0" ]
+}
