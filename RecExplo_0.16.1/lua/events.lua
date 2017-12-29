@@ -121,15 +121,19 @@ script.on_event(defines.events.on_gui_click, function(event)
 		end
 	end
 end)
-script.on_event(defines.events.on_gui_elem_changed, function(event)
-	if event.element.elem_value.type == "virtual" then
+script.on_event(defines.events.on_gui_elem_changed, function(event)	
+	if event.element.elem_value then
+		if event.element.elem_value.type == "virtual" then
+			event.element.elem_value = global[event.player_index].selctet_product_signal
+
+		elseif event.element.elem_value.name ~= global[event.player_index].selctet_product_signal.name then
+			global[event.player_index].selctet_product_signal = event.element.elem_value
+
+			recexplo.gui.update_results(event.player_index)
+			recexplo.gui.add_current_state_to_history(event.player_index)
+		end
+	else
 		event.element.elem_value = global[event.player_index].selctet_product_signal
-		
-	elseif event.element.elem_value.name ~= global[event.player_index].selctet_product_signal.name then
-		global[event.player_index].selctet_product_signal = event.element.elem_value
-		
-		recexplo.gui.update_results(event.player_index)
-		recexplo.gui.add_current_state_to_history(event.player_index)
 	end
 end)
 script.on_event(defines.events.on_gui_checked_state_changed, function(event)
