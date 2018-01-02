@@ -26,6 +26,13 @@ data:extend({
         minimum_value = 1
     },
     {
+        type = "int-setting",
+        name = "recexplo-max-history-length",
+        setting_type = "runtime-per-user",
+        default_value = 20,
+        minimum_value = 3
+    },
+    {
         type = "string-setting",
         name = "recexplo-window-resolution-height",
         setting_type = "runtime-per-user",

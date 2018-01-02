@@ -39,20 +39,21 @@ script.on_event(defines.events.on_gui_click, function(event)
 	
 		if	string.find(event.element.name, recexplo.prefix_item_button_product, 1) ~= nil then	
 			local product_name = string.sub(event.element.name, string.len(recexplo.prefix_item_button_product) + 1)
-			recexplo.gui.update_selectet_product(player_index, product_name, "where_used")
-			recexplo.gui.update_radio_buttons_display_mode(player_index)
+			recexplo.gui.update_to_selectet_product(player_index, product_name, "where_used")
+			recexplo.gui.update(player_index)
 
 		elseif string.find(event.element.name, recexplo.prefix_item_button_ingredient, 1) ~= nil then	
 			local product_name = string.sub(event.element.name, string.len(recexplo.prefix_item_button_ingredient) + 1)
-			recexplo.gui.update_selectet_product(player_index, product_name, "recipe")
-			recexplo.gui.update_radio_buttons_display_mode(player_index)
+			recexplo.gui.update_to_selectet_product(player_index, product_name, "recipe")
+			recexplo.gui.update(player_index)
 
 		elseif string.find(event.element.name, recexplo.prefix_made_in, 1) ~= nil then
 			local entity_name = string.sub(event.element.name, string.len(recexplo.prefix_made_in) + 1)
 			for _, item_prototypes in pairs(game.item_prototypes) do
 				if item_prototypes.place_result and item_prototypes.place_result.name == entity_name then
 					local product_name = item_prototypes.name
-					recexplo.gui.update_selectet_product(player_index, product_name, "recipe")
+					recexplo.gui.update_to_selectet_product(player_index, product_name, "recipe")
+					recexplo.gui.update(player_index)
 					goto done
 				end
 			end
@@ -78,6 +79,17 @@ script.on_event(defines.events.on_gui_click, function(event)
 			else
 				player.print({"recexplo-consol.you-have-not-unlockt-the-recipe"})
 			end
+
+		elseif string.find(event.element.name, recexplo.prefix_history_itme, 1) ~= nil then
+			local pos = tonumber(string.sub(event.element.name, string.len(recexplo.prefix_history_itme) + 1))
+			if event.button == defines.mouse_button_type.left then
+				global[player_index].history.pos = pos
+			elseif event.button == defines.mouse_button_type.right then
+				recexplo.history.delete_pos(player_index, pos)
+			end
+			
+			recexplo.history.load_selected(player_index)
+			recexplo.gui.update(player_index)
 
 		elseif string.find(event.element.name, recexplo.prefix_recipe, 1) ~= nil then
 			local recipe = string.sub(event.element.name, string.len(recexplo.prefix_recipe) + 1)
@@ -112,42 +124,53 @@ script.on_event(defines.events.on_gui_click, function(event)
 				player.print({"recexplo-consol.enable-experimental-features"})
 			end
 		elseif event.element.name == "recexplo_history_button_back" then
-			recexplo.gui.history_go_backward(player_index)
+			recexplo.history.go_backward(player_index)
+			recexplo.gui.update(player_index)
 
 		elseif event.element.name == "recexplo_history_button_forward" then
-			recexplo.gui.history_go_forward(player_index)
-		
+			recexplo.history.go_forward(player_index)
+			recexplo.gui.update(player_index)
 
 		end
 	end
 end)
-script.on_event(defines.events.on_gui_elem_changed, function(event)	
-	if event.element.elem_value then
-		if event.element.elem_value.type == "virtual" then
-			event.element.elem_value = global[event.player_index].selctet_product_signal
+script.on_event(defines.events.on_gui_elem_changed, function(event)
+	if event.element.name == "recexplo_choose_elem_button" then
+		local player_index = event.player_index
+		if event.element.elem_value then
+			if event.element.elem_value.type == "virtual" then
+				event.element.elem_value = global[player_index].selctet_product_signal
 
-		elseif event.element.elem_value.name ~= global[event.player_index].selctet_product_signal.name then
-			global[event.player_index].selctet_product_signal = event.element.elem_value
+			elseif not(global[player_index].selctet_product_signal) or event.element.elem_value.name ~= global[player_index].selctet_product_signal.name then
+				global[player_index].selctet_product_signal = event.element.elem_value
 
-			recexplo.gui.update_results(event.player_index)
-			recexplo.gui.add_current_state_to_history(event.player_index)
+				recexplo.history.add_current_state(player_index)
+				recexplo.gui.update(player_index)
+			end
+		else
+			local delete_pos = global[player_index].history.pos
+			recexplo.history.delete_pos(player_index, delete_pos)
+			recexplo.history.load_selected(player_index)
+			recexplo.gui.update(player_index)
 		end
-	else
-		event.element.elem_value = global[event.player_index].selctet_product_signal
 	end
 end)
 script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 	local player_index = event.player_index
-	if event.element.name == "radiobutton_dm_recipe" then
-		global[player_index].display_mod = "recipe"
-	elseif event.element.name == "radiobutton_dm_where_used" then
-		global[player_index].display_mod = "where_used"
-	else
-		return
+	if global[player_index].gui.is_open then
+		if event.element.name == "radiobutton_dm_recipe" then
+			global[player_index].display_mode = "recipe"
+		elseif event.element.name == "radiobutton_dm_where_used" then
+			global[player_index].display_mode = "where_used"
+		elseif event.element.name == "recexplo_insert_mode" then
+			global[player_index].history.insert_mode = event.element.state
+			return
+		else
+			return
+		end
+		recexplo.history.save_state(player_index, global[player_index].history.pos)
+		recexplo.gui.update(player_index)
 	end
-	recexplo.gui.update_radio_buttons_display_mode(player_index)
-	recexplo.gui.update_results(player_index)
-	recexplo.gui.save_state_in_history(player_index, global[player_index].history.pos)
 end)
 
 script.on_event(defines.events.on_player_selected_area,function(event)
