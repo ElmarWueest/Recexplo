@@ -1,4 +1,5 @@
 require "lua/initialisation"
+require "lua/history"
 
 --open/close gui
 function recexplo.gui.open(player_index)
@@ -15,9 +16,15 @@ function recexplo.gui.open(player_index)
 			name = "recexplo_gui_table",
 			column_count = 1
 		}
-	
+		
 		--item selection
-		recexplo.gui.draw_product_selection(player_index, window)
+		local table_item_selection = window.add{
+			type = "table",
+			name = "table_item_selection",
+			column_count = 2000000,
+			style = "table"
+		}
+		recexplo.gui.draw_product_selection(player_index, table_item_selection)
 	
 		--controlls
 		recexplo.gui.draw_controlls(player_index, window)
@@ -32,98 +39,121 @@ function recexplo.gui.open(player_index)
 		recexplo.gui.create_results(player_index, result_gui_root)
 	end
 end
-function recexplo.gui.close (player_index)
+function recexplo.gui.close(player_index)
 	global[player_index].gui.is_open = false
 	if game.players[player_index].gui.left.recexplo_gui_frame then
 		game.players[player_index].gui.left.recexplo_gui_frame.destroy()
 	end
 end
-
-
-
---draw/update controlls
-function recexplo.gui.draw_controlls(player_index, gui_root)
-		--radiobutton test
-	gui_root.add{
-		type = "table",
-		name = "controlls_table",
-		column_count = 2
-	}
-	
-	local radiobutton_table = gui_root.controlls_table.add{
-		type = "table",
-		name = "display_mod_table",
-		column_count = 6,
-		style = "table"
-	}
-	--todo add history arrow button
-	recexplo.gui.draw_radio_buttons_display_mode(player_index, radiobutton_table)
-
-	recexplo.gui.draw_history_button(radiobutton_table)
-	
+function recexplo.gui.update(player_index)
+	recexplo.gui.update_product_selection(player_index)
+	recexplo.gui.update_radio_buttons_display_mode(player_index)
+	recexplo.gui.update_results(player_index)
 end
 
+--draw/update controlls
 function recexplo.gui.draw_product_selection(player_index, gui_root)
-	local table = gui_root.add{
-		type = "table",
-		name = "recexplo_table_item_selection",
-		column_count = 2,
-		style = "table"
-	}
-	table.add{
+	--game.print("draw_product_selection")
+	gui_root.add{
 		type = "label",
 		name = "lable_selcted_item",
 		style = "recexplo_title_lst",
 		caption = {"recexplo-gui.selected-item", ":"}
 	}
-	
-	table.add{
+	--recexplo.history.debug(player_index)
+	local history = global[player_index].history
+	if history.pos > 0 then
+		for i = 1, history.length,1 do
+			if i == history.pos then
+				--game.print("draw_select_button i:"..tostring(i))
+				recexplo.gui.draw_select_button(player_index, gui_root)
+			else
+				--game.print("draw_history_item i:"..tostring(i))
+				recexplo.gui.draw_history_item(player_index, gui_root, i)
+			end
+		end
+	else
+		recexplo.gui.draw_select_button(player_index, gui_root)
+	end
+end
+function recexplo.gui.draw_select_button(player_index, gui_root)
+	local frame = gui_root.add{
+		type = "frame",
+		name = "selected_history_item_frame",
+		style = "recexplo_selection_frame"
+	}
+	frame.add{
 		type = "choose-elem-button",
-		name = "choose_elem_button",
+		name = "recexplo_choose_elem_button",
 		elem_type = "signal",
 		signal = global[player_index].selctet_product_signal
 	}
-
 end
-
-function recexplo.gui.draw_radio_buttons_display_mode(player_index, gui_root)
-	gui_root.add{
-		type = "label",
-		name = "display_mod_label_recipe",
-		caption = {"recexplo-gui.find-recipe",":"}
-	}
-	gui_root.add{
-		type = "radiobutton",
-		name = "radiobutton_dm_recipe",
-		state = true
-	}
-	gui_root.add{
-		type = "label",
-		name = "display_mod_label_where_used",
-		caption = {"recexplo-gui.find-where-it-is-used",":"}
-	}
-	gui_root.add{
-		type = "radiobutton",
-		name = "radiobutton_dm_where_used",
-		state = false
+function recexplo.gui.draw_history_item(player_index, gui_root, i)
+	--recexplo.history.debug(player_index)
+	local i_signal = global[player_index].history[i].signal
+	local button = {
+		type = "sprite-button",
+		name = recexplo.prefix_history_itme .. tostring(i),
+		style = "slot_button",
 	}
 	
-	recexplo.gui.update_radio_buttons_display_mode(player_index)
-end
-function recexplo.gui.update_radio_buttons_display_mode(player_index)
-	if global[player_index].gui.is_open then
-		local gui_root = game.players[player_index].gui.left.recexplo_gui_frame.recexplo_gui_table.controlls_table.display_mod_table
-		if global[player_index].display_mod == "recipe" then
-			gui_root["radiobutton_dm_recipe"].state = true
-			gui_root["radiobutton_dm_where_used"].state = false
-		elseif global[player_index].display_mod == "where_used" then
-			gui_root["radiobutton_dm_recipe"].state = false
-			gui_root["radiobutton_dm_where_used"].state = true
-		end
+	if i_signal.type == "item" then
+		button.sprite = "item/" .. i_signal.name
+		button.tooltip = game.item_prototypes[i_signal.name].localised_name
+	elseif i_signal.type == "fluid" then
+		button.sprite = "fluid/" .. i_signal.name
+		button.tooltip = game.fluid_prototypes[i_signal.name].localised_name
 	end
+
+	gui_root.add(button)
+end
+
+function recexplo.gui.update_product_selection(player_index)
+	local gui_root = game.players[player_index].gui.left.recexplo_gui_frame.recexplo_gui_table.table_item_selection
+	gui_root.clear()
+	recexplo.gui.draw_product_selection(player_index, gui_root)
 end
 
 
+function recexplo.gui.draw_controlls(player_index, gui_root)
+	--radiobutton test
+	gui_root.add{
+		type = "table",
+		name = "controlls_table",
+		column_count = 1
+	}
+	local insert_mode_tabel = gui_root.controlls_table.add{
+		type = "table",
+		name = "insert_mode_table",
+		column_count = 4,
+		style = "table"
+	}
+	recexplo.gui.draw_insert_mode(player_index, insert_mode_tabel)
+	recexplo.gui.draw_history_button(insert_mode_tabel)
+
+	local radiobutton_table = gui_root.controlls_table.add{
+		type = "table",
+		name = "display_mode_table",
+		column_count = 4,
+		style = "table"
+	}
+	--todo add history arrow button
+	recexplo.gui.draw_radio_buttons_display_mode(player_index, radiobutton_table)
+end
+
+function recexplo.gui.draw_insert_mode(player_index, gui_root)
+	gui_root.add{
+		type = "label",
+		name = "insert_mode_label",
+		caption = {"recexplo-gui.insert-mode"}
+	}
+	gui_root.add{
+		type = "checkbox",
+		name = "recexplo_insert_mode",
+		state = global[player_index].history.insert_mode
+	}
+end
 
 function recexplo.gui.draw_history_button(gui_root)
 	gui_root.add{
@@ -138,101 +168,48 @@ function recexplo.gui.draw_history_button(gui_root)
 	}
 end
 
-function recexplo.gui.add_current_state_to_history(player_index)
-	if global[player_index].history.length == global[player_index].history.pos then
-		if global[player_index].history.length == recexplo.history.max_length then
-			--hidden limit
-			for i = (recexplo.history.max_delta + 1), recexplo.history.max_length, 1 do
-				global[player_index].history[i - recexplo.history.max_delta] = global[player_index].history[i]
-			end
-			global[player_index].history.length = recexplo.history.max_length - recexplo.history.max_delta + 1
-			global[player_index].history.pos = global[player_index].history.length
-			local pos = global[player_index].history.pos
-
-			recexplo.gui.save_state_in_history(player_index, pos)
-		else
-			-- grow in size
-			global[player_index].history.length = global[player_index].history.length + 1
-			global[player_index].history.pos = global[player_index].history.pos + 1
-			local pos = global[player_index].history.pos
-			
-			recexplo.gui.save_state_in_history(player_index, pos)
-		end
-	else
-		--backward, add_current_state_to_history
-		global[player_index].history.pos = global[player_index].history.pos + 1
-		global[player_index].history.length = global[player_index].history.pos
-		local pos = global[player_index].history.length
-		
-		recexplo.gui.save_state_in_history(player_index, pos)
-	end	
+function recexplo.gui.draw_radio_buttons_display_mode(player_index, gui_root)
+	gui_root.add{
+		type = "label",
+		name = "display_mode_label_recipe",
+		caption = {"recexplo-gui.find-recipe",":"}
+	}
+	gui_root.add{
+		type = "radiobutton",
+		name = "radiobutton_dm_recipe",
+		state = true
+	}
+	gui_root.add{
+		type = "label",
+		name = "display_mode_label_where_used",
+		caption = {"recexplo-gui.find-where-it-is-used",":"}
+	}
+	gui_root.add{
+		type = "radiobutton",
+		name = "radiobutton_dm_where_used",
+		state = false
+	}
 	
-	--game.print("add history")
-	recexplo.gui.history_debug(player_index)
+	recexplo.gui.update_radio_buttons_display_mode(player_index)
 end
-function recexplo.gui.save_state_in_history(player_index, pos)
-	global[player_index].history[pos] = {}
-	global[player_index].history[pos].signal = {}
-	global[player_index].history[pos].signal.name = global[player_index].selctet_product_signal.name
-	global[player_index].history[pos].signal.type = global[player_index].selctet_product_signal.type
-	global[player_index].history[pos].display_mod = global[player_index].display_mod
-end
-
-function recexplo.gui.history_go_forward(player_index)
-	if global[player_index].history.pos < global[player_index].history.length then
-		global[player_index].history.pos = global[player_index].history.pos + 1
-		local pos = global[player_index].history.pos
-		recexplo.gui.load_from_history(player_index, pos)
-
-		recexplo.gui.update_results(player_index)
-		recexplo.gui.update_radio_buttons_display_mode(player_index)
-
-		--game.print("history_go_forward")
-		recexplo.gui.history_debug(player_index)
-	end
-end
-function recexplo.gui.history_go_backward(player_index)
-	if global[player_index].history.pos > 1 then
-		global[player_index].history.pos = global[player_index].history.pos - 1
-		local pos = global[player_index].history.pos
-		recexplo.gui.load_from_history(player_index, pos)
-
-		recexplo.gui.update_results(player_index)
-		recexplo.gui.update_radio_buttons_display_mode(player_index)
-
-		--game.print("history_go_backward")
-		recexplo.gui.history_debug(player_index)
-	end
-end
-function recexplo.gui.load_from_history(player_index, pos)
-	global[player_index].selctet_product_signal.name = global[player_index].history[pos].signal.name
-	global[player_index].selctet_product_signal.type = global[player_index].history[pos].signal.type
-	global[player_index].display_mod = global[player_index].history[pos].display_mod
-end
-
-function recexplo.gui.history_debug(player_index)
-		local pos = global[player_index].history.pos
-		local length = global[player_index].history.length
-		local name = global[player_index].history[pos].signal.name
-		local display_mod = tostring(global[player_index].history[pos].display_mod)
-		--game.print("length: " .. length)
-		--game.print("pos: " .. pos)
-		--game.print("name: " .. name)
-		--game.print("display_mod: " .. display_mod)
-		local i = 1
-		local text = ""
-		::start::
-		if global[player_index].history[i] then
-			text = text .. "/ " .. tostring(i).. " " .. global[player_index].history[i].signal.name
-			i = i + 1
-			goto start
+function recexplo.gui.update_radio_buttons_display_mode(player_index)
+	if global[player_index].gui.is_open then
+		local gui_root = game.players[player_index].gui.left.recexplo_gui_frame.recexplo_gui_table.controlls_table.display_mode_table
+		if global[player_index].display_mode == "recipe" then
+			gui_root["radiobutton_dm_recipe"].state = true
+			gui_root["radiobutton_dm_where_used"].state = false
+		elseif global[player_index].display_mode == "where_used" then
+			gui_root["radiobutton_dm_recipe"].state = false
+			gui_root["radiobutton_dm_where_used"].state = true
 		end
-		--game.print("stack: " .. text)
+	end
 end
+
+
 
 
 --create/update results/product
-function recexplo.gui.update_selectet_product(player_index, product_name, display_mod)
+function recexplo.gui.update_to_selectet_product(player_index, product_name, display_mode)
 	if global[player_index].selctet_product_signal.name ~= product_name then
 		global[player_index].selctet_product_signal.name = product_name
 		
@@ -244,15 +221,13 @@ function recexplo.gui.update_selectet_product(player_index, product_name, displa
 			game.print("recexplo.gui.draw_poduct_button / this is no item or fluid: " .. product_name)
 		end
 		
-		global[player_index].display_mod = display_mod
+		global[player_index].display_mode = display_mode
 
-		recexplo.gui.update_results(player_index)
-		recexplo.gui.add_current_state_to_history(player_index)
+		recexplo.history.add_current_state(player_index)
 
-	elseif display_mod ~= global[player_index].display_mod then
-		global[player_index].display_mod = display_mod
-		recexplo.gui.update_results(player_index)
-		recexplo.gui.update_radio_buttons_display_mode(player_index)
+
+	elseif display_mode ~= global[player_index].display_mode then
+		global[player_index].display_mode = display_mode
 	end
 end
 function recexplo.gui.update_results(player_index)
@@ -261,19 +236,18 @@ function recexplo.gui.update_results(player_index)
 	
 	window_root.table_result_cpl.clear()
 	recexplo.gui.create_results(player_index, window_root.table_result_cpl)
-
-	window_root.recexplo_table_item_selection.choose_elem_button.elem_value = global[player_index].selctet_product_signal
 end
 
 
 function recexplo.gui.create_results(player_index, gui_root)
+	if global[player_index].selctet_product_signal then
+		if global[player_index].display_mode == "recipe" then
+			recexplo.gui.create_all_recipes_container(player_index, gui_root)
 
-	if global[player_index].display_mod == "recipe" then
-		recexplo.gui.create_all_recipes_container(player_index, gui_root)
-		
-	elseif global[player_index].display_mod == "where_used" then
-		recexplo.gui.create_all_where_used_container(player_index, gui_root)
-		
+		elseif global[player_index].display_mode == "where_used" then
+			recexplo.gui.create_all_where_used_container(player_index, gui_root)
+
+		end
 	end
 end
 

@@ -51,20 +51,30 @@ data:extend({
 
 --flow_style
 data.raw["gui-style"].default["recexplo_flow"] ={
-    type = "flow_style",
-    parent = "flow",
-    horizontal_spacing = 0,
-    vertical_spacing = 0,
+  type = "flow_style",
+  parent = "flow",
+  horizontal_spacing = 0,
+  vertical_spacing = 0,
 }
 
 
 --frame_style
-data.raw["gui-style"].default["recexplo_flow"] ={
-    type = "flow_style",
-    parent = "flow",
-    horizontal_spacing = 0,
-    vertical_spacing = 0,
+data.raw["gui-style"].default["recexplo_selection_frame"] ={
+  type = "frame_style",
+  parent = "frame",
+  top_padding  = 1,
+  right_padding = 2,
+  bottom_padding = 2,
+  left_padding = 1,
+  graphical_set = {
+    type = "composition",
+    filename = "__core__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    corner_size = {3, 3},
+    position = {0, 8}
+  }
 }
+
 
 --scroll_pane_style
 data.raw["gui-style"].default["recexplo_recipes_scroll_plane_300"] = {
