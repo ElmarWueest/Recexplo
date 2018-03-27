@@ -187,7 +187,7 @@ script.on_event(defines.events.on_player_selected_area,function(event)
 						--game.print("faund same category: ".. pasting_category)
 						--game.print("try paste recipe")
 						
-						entity.recipe = global[event.player_index].pasting_recipe
+						entity.set_recipe(global[event.player_index].pasting_recipe)
 						--game.print("copied reciepy: "..global[event.player_index].pasting_recipe.name)
 						global[event.player_index].pasting_enabled = false
 						--game.print("cursor_stack.name: "..player.cursor_stack.name)
