@@ -114,7 +114,7 @@ function recexplo.history.load(player_index, pos)
     else
         global[player_index].selctet_product_signal.name = nil
 	    global[player_index].selctet_product_signal.type = nil
-       global[player_index].selctet_product_signal = nil
+    	global[player_index].selctet_product_signal = nil
         global[player_index].display_mode = "recipe"
     end
 end

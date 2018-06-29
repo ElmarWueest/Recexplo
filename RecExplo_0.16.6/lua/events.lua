@@ -3,14 +3,11 @@ require "lua/explo_gui"
 require "lua/open_tech"
 
 script.on_event(defines.events.on_tick, function(event)
-	if game.tick % 20 == 0 then
+	if game.tick % 31 == 0 then
 		for i, player in pairs(game.connected_players) do
-			--gui button
-			--[[if player.gui.top.b_recexplo == nil then
-				player.gui.top.add{type="button", name="b_recexplo", caption = "Recipe Explorer"}
-			end]]
 			recexplo.create_global_table(player.index)
 		end
+
 	end
 	if recexplo.had_opened_tech then
 		if recexplo.had_opened_tech > 1 then
@@ -26,7 +23,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 	local player_index = event.player_index
 	local player = game.players[player_index]
 	
-	--game.print("gui name:"..event.element.name)
+	--game.print("gui name on_gui_click:" .. event.element.name)
 	if event.element.name == "b_recexplo" then
 		--player.print("clicked test button")
 		if global[player_index].gui.is_open then
@@ -38,15 +35,21 @@ script.on_event(defines.events.on_gui_click, function(event)
 	elseif global[player_index].gui.is_open then
 	
 		if	string.find(event.element.name, recexplo.prefix_item_button_product, 1) ~= nil then	
+			--game.print("name 4 parents: " .. event.element.parent.parent.parent.parent.name)
 			local product_name = string.sub(event.element.name, string.len(recexplo.prefix_item_button_product) + 1)
+			recexplo.cal_gui.tray_add_recipe(event, product_name, "where_used")
 			recexplo.gui.update_to_selectet_product(player_index, product_name, "where_used")
 			recexplo.gui.update(player_index)
+			return
 
 		elseif string.find(event.element.name, recexplo.prefix_item_button_ingredient, 1) ~= nil then	
+			--game.print("name 4 parents: " .. event.element.parent.parent.parent.parent.name)
 			local product_name = string.sub(event.element.name, string.len(recexplo.prefix_item_button_ingredient) + 1)
+			recexplo.cal_gui.tray_add_recipe(event, product_name, "recipe")
 			recexplo.gui.update_to_selectet_product(player_index, product_name, "recipe")
 			recexplo.gui.update(player_index)
-
+			return
+			
 		elseif string.find(event.element.name, recexplo.prefix_made_in, 1) ~= nil then
 			local entity_name = string.sub(event.element.name, string.len(recexplo.prefix_made_in) + 1)
 			for _, item_prototypes in pairs(game.item_prototypes) do
@@ -54,11 +57,11 @@ script.on_event(defines.events.on_gui_click, function(event)
 					local product_name = item_prototypes.name
 					recexplo.gui.update_to_selectet_product(player_index, product_name, "recipe")
 					recexplo.gui.update(player_index)
-					goto done
+					return
 				end
 			end
-			::done::
-
+			return
+						
 		elseif string.find(event.element.name, recexplo.prefix_made_in_player, 1) ~= nil then
 			local recipe_name = string.sub(event.element.name, string.len(recexplo.prefix_made_in_player) + 1)
 			local recipe = player.force.recipes[recipe_name]
@@ -79,7 +82,8 @@ script.on_event(defines.events.on_gui_click, function(event)
 			else
 				player.print({"recexplo-consol.you-have-not-unlockt-the-recipe"})
 			end
-
+			return
+			
 		elseif string.find(event.element.name, recexplo.prefix_history_itme, 1) ~= nil then
 			local pos = tonumber(string.sub(event.element.name, string.len(recexplo.prefix_history_itme) + 1))
 			if event.button == defines.mouse_button_type.left then
@@ -90,7 +94,8 @@ script.on_event(defines.events.on_gui_click, function(event)
 			
 			recexplo.history.load_selected(player_index)
 			recexplo.gui.update(player_index)
-
+			return
+			
 		elseif string.find(event.element.name, recexplo.prefix_recipe, 1) ~= nil then
 			local recipe = string.sub(event.element.name, string.len(recexplo.prefix_recipe) + 1)
 			
@@ -106,13 +111,14 @@ script.on_event(defines.events.on_gui_click, function(event)
 							player.clean_cursor()
 							player.cursor_stack.set_stack("recexplo-pasting-tool")
 
-							goto done
+							goto exit
 						end
 					end 
 				end 
 			end
 			player.print({"recexplo-consol.you-have-not-unlockt-the-recipe"}) 
-			::done::
+			return
+			
 		elseif string.find(event.element.name, recexplo.prefix_technology, 1) ~= nil then
 			if player.mod_settings["recexplo-enable-experimental-features"].value then
 				local tech_name = string.sub(event.element.name, string.len(recexplo.prefix_technology) + 1)
@@ -123,16 +129,92 @@ script.on_event(defines.events.on_gui_click, function(event)
 			else
 				player.print({"recexplo-consol.enable-experimental-features"})
 			end
+			return
+			
+		elseif string.find(event.element.name, recexplo.prefix_display_recipe, 1) then
+			local recipe_name = string.sub(event.element.name, string.len(recexplo.prefix_display_recipe) + 1)
+			recexplo.gui.update_to_selectet_product(player_index, recipe_name, "single_recipe")
+			recexplo.gui.update(player_index)
+			return
+
 		elseif event.element.name == "recexplo_history_button_back" then
 			recexplo.history.go_backward(player_index)
 			recexplo.gui.update(player_index)
-
+			return
+			
 		elseif event.element.name == "recexplo_history_button_forward" then
 			recexplo.history.go_forward(player_index)
 			recexplo.gui.update(player_index)
-
+			return
+			
+		elseif event.element.name == "recexplo_open_cal_gui" then
+			if global[player_index].cal_gui.is_open then
+				recexplo.cal_gui.close(player_index)
+			else
+				recexplo.cal_gui.open(player_index)
+			end
+			return
+		elseif event.element.name == "recexplo_recipe_choose_elem_button" then
+			if event.button == defines.mouse_button_type.right then
+				local delete_pos = global[player_index].history.pos
+				recexplo.history.delete_pos(player_index, delete_pos)
+				recexplo.history.load_selected(player_index)
+				recexplo.gui.update(player_index)
+			end
+			return
 		end
 	end
+	if global[player_index].cal_gui.is_open and global[player_index].gui.is_open then
+		if event.element.name == "recexplo_record" then
+			if global[player_index].cal_gui.is_recording then
+				recexplo.cal_gui.change_record_mode(player_index, false)
+			else
+				recexplo.cal_gui.change_record_mode(player_index, true)
+			end
+			return
+		elseif event.element.name == "recexplo_remove_all_cal" then
+			recexplo.cal_gui.remove_all_cal(player_index)
+			return
+		elseif string.find(event.element.name, recexplo.prefix_remove_cal, 1) then
+			local cal_recipe_index = string.sub(event.element.name, string.len(recexplo.prefix_remove_cal) + 1)
+			cal_recipe_index = tonumber(cal_recipe_index)
+			recexplo.cal_gui.delete_at_index(player_index, cal_recipe_index)
+			return
+		elseif string.find(event.element.name, recexplo.prefix_cal_made_in, 1) then
+			local data = string.sub(event.element.name, string.len(recexplo.prefix_cal_made_in) + 1)
+			local seperator_index = string.find(data, "/")
+			local cal_recipe_index = tonumber(string.sub(data, 1, seperator_index - 1))
+			local made_in_index = tonumber(string.sub(data, seperator_index + 1))
+
+			--game.print("cal_recipe_index: " .. cal_recipe_index .. ", made_in_index: " .. made_in_index)
+			if event.button == defines.mouse_button_type.left then
+				local cal_gui =  global[player_index].cal_gui
+				local cal_recipe = cal_gui[cal_recipe_index]
+				if made_in_index ~= cal_recipe.made_in.selected_entity_index then
+					recexplo.cal_gui.select_made_in(player_index, cal_recipe_index, made_in_index, event.element)
+				end
+			elseif event.button == defines.mouse_button_type.right then
+				local cal_gui = global[player_index].cal_gui
+				local entity = cal_gui[cal_recipe_index].made_in[made_in_index]
+
+				for _, item_prototypes in pairs(game.item_prototypes) do
+					if item_prototypes.place_result and item_prototypes.place_result.name == entity.name then
+						local product_name = item_prototypes.name
+						recexplo.gui.update_to_selectet_product(player_index, product_name, "recipe")
+						recexplo.gui.update(player_index)
+						return
+					end
+				end
+			end
+			return
+		elseif string.find(event.element.name, recexplo.prefix_cal_item_button, 1) then
+			local product_name = string.sub(event.element.name, string.len(recexplo.prefix_cal_item_button) + 1)
+			recexplo.gui.update_to_selectet_product(player_index, product_name, "recipe")
+			recexplo.gui.update(player_index)
+			return
+		end
+	end
+	::exit::
 end)
 script.on_event(defines.events.on_gui_elem_changed, function(event)
 	if event.element.name == "recexplo_choose_elem_button" then
@@ -159,19 +241,69 @@ script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 	local player_index = event.player_index
 	if global[player_index].gui.is_open then
 		if event.element.name == "radiobutton_dm_recipe" then
-			global[player_index].display_mode = "recipe"
+			if global[player_index].display_mode == "where_used" then
+				global[player_index].display_mode = "recipe"
+			end
+			recexplo.history.save_state(player_index, global[player_index].history.pos)
+			recexplo.gui.update(player_index)
+	
 		elseif event.element.name == "radiobutton_dm_where_used" then
-			global[player_index].display_mode = "where_used"
+			if global[player_index].display_mode == "recipe" then
+				global[player_index].display_mode = "where_used"
+			end
+			recexplo.history.save_state(player_index, global[player_index].history.pos)
+			recexplo.gui.update(player_index)
+	
 		elseif event.element.name == "recexplo_insert_mode" then
 			global[player_index].history.insert_mode = event.element.state
-			return
-		else
-			return
+		elseif event.element.name == "recexplo_manual_input_radiobutton" or event.element.name == "recexplo_manual_output_radiobutton"then
+			local io_type
+			if event.element.name == "recexplo_manual_input_radiobutton" then
+				io_type = "input"
+			elseif  event.element.name == "recexplo_manual_output_radiobutton" then
+				io_type = "output"
+			end
+
+			local cal_gui = global[player_index].cal_gui
+			
+			local gui_root =  game.players[player_index].gui.left.recexplo_flow.recexplo_cal_gui_frame.recexplo_cal_gui_scroll_plane.recexplo_cal_gui_table
+			local index, io_cal_recipe, layout_table
+			if io_type == "input" then
+				index = cal_gui.begin_index
+				io_cal_recipe = cal_gui[index]
+				layout_table = gui_root.input_cal_recipe_frame.io_cal_recipe_table.io_cal_recipe_main_layout_table
+			elseif  io_type == "output" then
+				index = cal_gui.end_index
+				io_cal_recipe = cal_gui[index]
+				layout_table = gui_root.output_cal_recipe_frame.io_cal_recipe_table.io_cal_recipe_main_layout_table
+			end
+
+			io_cal_recipe.made_in.selected_entity_index = -1
+
+			local cal_made_in_table = layout_table.cal_main_made_in_table.cal_made_in_table
+			cal_made_in_table.clear()
+
+			recexplo.cal_gui.draw_cal_recipe_made_in(cal_made_in_table, index, io_cal_recipe)
+
+			recexplo.cal_gui.update_stats(player_index)
 		end
-		recexplo.history.save_state(player_index, global[player_index].history.pos)
-		recexplo.gui.update(player_index)
 	end
 end)
+script.on_event(defines.events.on_gui_text_changed, function(event)
+	local player_index = event.player_index
+	if string.find(event.element.name, recexplo.prefix_cal_factories_amount, 1) then
+		local cal_recipe_index = string.sub(event.element.name, string.len(recexplo.prefix_cal_factories_amount) + 1)
+		cal_recipe_index = tonumber(cal_recipe_index)
+		if cal_recipe_index then
+			recexplo.cal_gui.update_factories(player_index, cal_recipe_index, event.element.text)
+		end
+	elseif event.element.name == "recexplo_manual_input_textfield" then
+		recexplo.cal_gui.update_manual_io(player_index, "input", event.element.text)
+	elseif event.element.name == "recexplo_manual_output_textfield" then
+		recexplo.cal_gui.update_manual_io(player_index, "output", event.element.text)
+	end
+end)
+
 
 script.on_event(defines.events.on_player_selected_area,function(event)
 	--game.print("on_player_selected_area was fired")

@@ -38,5 +38,11 @@ data:extend({
         setting_type = "runtime-per-user",
         default_value = "600",
         allowed_values = {"300","400","500","600","700","800","900", "1000", "1100", "1200"}
+    },
+    {
+        type = "bool-setting",
+        name = "recexplo-enable-top-button",
+        setting_type = "runtime-per-user",
+        default_value = true
     }
 })
