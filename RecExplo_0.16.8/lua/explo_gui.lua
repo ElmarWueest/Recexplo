@@ -441,9 +441,12 @@ end
 --draw recipe
 function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 	--game.print("draw recipe: " .. recipe.name)
+	if gui_root["recipe_frame" .. recipe.name] then
+		return
+	end
 	local frame = gui_root.add{
 		type = "frame",
-		name = recexplo.prefix_recipe_frame .. recipe.name,
+		name = "recipe_frame" .. recipe.name,
 		direction = "vertical"
 	}.add{
 		type = "table",
