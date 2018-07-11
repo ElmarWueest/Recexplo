@@ -487,8 +487,10 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 		style = "recexplo_sub_title_lst",
 		caption = {"recexplo-gui.product",":"}
 	}
+	local i = 0
 	for _, product in pairs(recipe.products) do
-		recexplo.gui.draw_product(player_index, product_table, product)
+		i = i + 1
+		recexplo.gui.draw_product(player_index, product_table, product, i)
 	end
 	
 	--ingredients
@@ -513,10 +515,11 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 	--required technology
 	recexplo.gui.draw_required_technologies(frame, recipe, player_index)
 end
-function recexplo.gui.draw_product(player_index, gui_root, product)
+function recexplo.gui.draw_product(player_index, gui_root, product, i)
+	--game.print(product.name)
 	local product_table = gui_root.add{
 		type = "table",
-		name = "product_table_" .. product.name,
+		name = "product_table_" .. product.name .. i,
 		column_count = 2,
 		style = "table"
 	}
@@ -686,7 +689,18 @@ function recexplo.gui.draw_required_technologies(gui_root, recipe, player_index)
 						tech_button.style = "available_technology_slot"
 						::done::
 					end
-					table.add(tech_button)
+
+					--prevent adding same history button twice
+					local is_single = true
+					for _, child in pairs(table.children) do 
+						--game.print("child.name: " .. child.name .. ", tech_button.name, " .. tech_button.name)
+						if child.name == tech_button.name then
+							is_single = false
+						end
+					end
+					if is_single then
+						table.add(tech_button)
+					end
 				end
 			end
 		end
