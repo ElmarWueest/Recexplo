@@ -17,6 +17,8 @@ if not recexplo.prefix_cal_factories_amount then recexplo.prefix_cal_factories_a
 if not recexplo.prefix_display_recipe then recexplo.prefix_display_recipe = "prefix_display_recipe_" end
 if not recexplo.prefix_cal_item_button then recexplo.prefix_cal_item_button = "prefix_cal_item_button_" end
 
+if not recexplo.prefix_recipe_frame then recexplo.prefix_recipe_frame = "recipe_frame" end
+
 
 if not recexplo.history then recexplo.history = {} end	
 	
