@@ -144,7 +144,8 @@ script.on_event(defines.events.on_gui_click, function(event)
 			
 		elseif event.element.name == "recexplo_history_button_forward" then
 			recexplo.history.go_forward(player_index)
-			recexplo.gui.update(player_index)
+			recexplo.gui.update_product_selection(player_index)
+			--recexplo.gui.update(player_index)
 			return
 			
 		elseif event.element.name == "recexplo_open_cal_gui" then
@@ -161,6 +162,11 @@ script.on_event(defines.events.on_gui_click, function(event)
 				recexplo.history.load_selected(player_index)
 				recexplo.gui.update(player_index)
 			end
+			return
+		elseif event.element.name == "recexplo_del_history" then
+			recexplo.history.delete(player_index)
+			recexplo.history.load_selected(player_index)
+			recexplo.gui.update(player_index)
 			return
 		end
 	end

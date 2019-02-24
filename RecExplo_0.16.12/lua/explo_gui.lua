@@ -187,11 +187,16 @@ function recexplo.gui.draw_controlls(player_index, gui_root)
 	local insert_mode_table = gui_root.controlls_table.add{
 		type = "table",
 		name = "insert_mode_table",
-		column_count = 4,
+		column_count = 5,
 		style = "table"
 	}
 	recexplo.gui.draw_insert_mode(player_index, insert_mode_table)
 	recexplo.gui.draw_history_button(insert_mode_table)
+	insert_mode_table.add{
+		type = "sprite-button",
+		name = "recexplo_del_history",
+		sprite = "remove-icon"
+	}
 
 	local radiobutton_table = gui_root.controlls_table.add{
 		type = "table",
@@ -199,10 +204,8 @@ function recexplo.gui.draw_controlls(player_index, gui_root)
 		column_count = 4,
 		style = "table"
 	}
-	--todo add history arrow button
 	recexplo.gui.draw_radio_buttons_display_mode(player_index, radiobutton_table)
 end
-
 function recexplo.gui.draw_insert_mode(player_index, gui_root)
 	gui_root.add{
 		type = "label",
@@ -215,7 +218,6 @@ function recexplo.gui.draw_insert_mode(player_index, gui_root)
 		state = global[player_index].history.insert_mode
 	}
 end
-
 function recexplo.gui.draw_history_button(gui_root)
 	gui_root.add{
 		type = "button",
@@ -274,6 +276,7 @@ end
 
 --create/update results/product
 function recexplo.gui.update_to_selectet_product(player_index, name, display_mode)
+	--game.print("update_to_selectet_product: " .. name .. " / " .. display_mode,{b=1})
 	local signal = global[player_index].selctet_product_signal
 	local signal_type
 	if display_mode == "single_recipe" then
@@ -304,7 +307,8 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 			end
 		end
 	else
-		signal = {}
+		global[player_index].selctet_product_signal = {}
+		signal = global[player_index].selctet_product_signal
 		do_update = true
 	end
 
@@ -313,11 +317,16 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 		signal.type = signal_type
 		global[player_index].display_mode = display_mode
 
+		--game.print("signal.name: ".. signal.name,{g=0.3,b=1})
+		--game.print("signal.type: ".. signal.type,{g=0.3,b=1})
+		--game.print("global[player_index].display_mode: ".. global[player_index].display_mode,{g=0.3,b=1})
+
 		recexplo.history.add_current_state(player_index)
 
 	elseif display_mode ~= global[player_index].display_mode then
 		global[player_index].display_mode = display_mode
 	end
+
 end
 function recexplo.gui.update_results(player_index)
 	--game.print("update results")

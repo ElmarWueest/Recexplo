@@ -87,7 +87,7 @@ function recexplo.cal_gui.select_made_in(player_index, cal_recipe_index, made_in
 
 	local entity = made_in_list[made_in_list.selected_entity_index]
 	
-	if entity.name == "player" then
+	if entity.name == "player" or entity.crafting_speed == nil then
 		made_in_list.crafting_speed = 1
 	else
 		made_in_list.crafting_speed = entity.crafting_speed
@@ -154,53 +154,50 @@ function recexplo.cal_gui.check_insertebility(player_index, recipe, product_name
 		return "both"
 	end
 
-	--check if product is alredy added
-	for i = cal_gui.begin_index, cal_gui.end_index do
-		if cal_gui[i + 0.5] then
-			if cal_gui[i + 0.5] == product_name then
-				game.players[player_index].print({"recexplo-consol.alredy-in-the-list"})
-				return "none"
-			end
-		end
+	
+	local index, previous_offset
+
+	if insert_mode == "recipe" then
+		index = cal_gui.begin_index
+		previous_offset = 1
+		
+	elseif insert_mode == "where_used" then
+		index = cal_gui.end_index
+		previous_offset = -1
+
+	else
+		return "error"
 	end
 
-	if cal_gui[cal_gui.begin_index + 1].recipe.name == recipe.name and cal_gui[cal_gui.begin_index + 0.5] == nil then
-		return "only_product_name"
-	elseif cal_gui[cal_gui.end_index - 1].recipe.name == recipe.name and cal_gui[cal_gui.begin_index - 0.5] == nil then
+	local previous_product_index = index + (0.5 * previous_offset)
+	local previous_recipe_index = index + previous_offset
+	local previous_recipe_name = cal_gui[previous_recipe_index].recipe.name
+	local previous_product_name = cal_gui[previous_product_index]
+
+	if recipe.name == previous_recipe_name then
 		return "only_product_name"
 	end
 
 	if insert_mode == "recipe" then
-		index = cal_gui.begin_index
-
-		local used_product_name = cal_gui[index + 0.5]
 		for _, product in ipairs(recipe.products) do
-			if product.name == used_product_name then
+			if product.name == previous_product_name then
 				return "both"
 			end
 		end
-		--[[local previoused_product_name = cal_gui[index - 0.5]
-		if previoused_product_name == product_name then
-			return "revers"
-		end]]
-
-		return "none"
-	elseif insert_mode == "where_used" then
-		index = cal_gui.end_index
 		
-		local previoused_product_name = cal_gui[index - 0.5]
+	elseif insert_mode == "where_used" then
 		for _, ingredient in ipairs(recipe.ingredients) do
-			if ingredient.name == previoused_product_name then
+			if ingredient.name == previous_product_name then
 				return "both"
 			end
 		end
-		--[[local used_product_name = cal_gui[index + 0.5]
-		if used_product_name == product_name then
-			return "revers"
-		end]]
-
-		return "none"
+	else
+		return "error"
 	end
+
+
+
+	return "none"
 end
 function recexplo.cal_gui.add_recipe(player_index, recipe, product_name, insert_mode)
 	--game.print("cal_gui.add_recipe")
@@ -290,7 +287,7 @@ function recexplo.cal_gui.get_production_facilities(recipe)
 	made_in_list.selected_entity_index = 0
 
 	local entity = made_in_list[made_in_list.selected_entity_index]
-	if entity.name == "player" then
+	if entity.name == "player"  or entity.crafting_speed == nil then
 		made_in_list.crafting_speed = 1
 	else
 		made_in_list.crafting_speed = entity.crafting_speed
@@ -342,7 +339,6 @@ function recexplo.cal_gui.delete_at_index(player_index, cal_recipe_index)
 	end
 	recexplo.cal_gui.update(player_index)
 end
-
 --cal stats & update stats gui
 function recexplo.cal_gui.update_stats(player_index)
 	recexplo.cal_gui.calculat_stats(player_index)
@@ -375,7 +371,7 @@ function recexplo.cal_gui.calculat_stats(player_index)
 end
 function recexplo.cal_gui.calculat_recipes(cal_recipe, product_name, ingredient_name)
 	local stats = cal_recipe.stats
-	
+	--game.print("debug log !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	if product_name then
 		local product_amount
 		-- calculate product_amount
@@ -418,7 +414,8 @@ function recexplo.cal_gui.calculat_factories(player_index, cal_recipe_index)
 end
 
 function recexplo.cal_gui.update_stats_gui(player_index, cal_recipe_index, io_type)
-	local cal_recipe = global[player_index].cal_gui[cal_recipe_index]
+	local cal_gui = global[player_index].cal_gui
+	local cal_recipe = cal_gui[cal_recipe_index]
 	local stats = cal_recipe.stats
 	
 	local gui_root = game.players[player_index].gui.left.recexplo_flow.recexplo_cal_gui_frame.recexplo_cal_gui_scroll_plane.recexplo_cal_gui_table
@@ -426,8 +423,18 @@ function recexplo.cal_gui.update_stats_gui(player_index, cal_recipe_index, io_ty
 	if io_type == nil then
 		layout_table = gui_root["cal_recipe_frame_" .. cal_recipe.recipe.name]["cal_recipe_table" .. cal_recipe.recipe.name].cal_recipe_main_layout_table
 	elseif io_type == "input" then
+		--if no input return
+		local i = cal_gui.begin_index + 0.5
+		if not cal_gui[i] then
+			return
+		end
 		layout_table = gui_root.input_cal_recipe_frame.io_cal_recipe_table.io_cal_recipe_main_layout_table
 	elseif io_type == "output" then
+		--if no output return
+		local i = cal_gui.end_index - 0.5
+		if not cal_gui[i] then
+			return
+		end	
 		layout_table = gui_root.output_cal_recipe_frame.io_cal_recipe_table.io_cal_recipe_main_layout_table
 	end
 		
@@ -465,7 +472,8 @@ function recexplo.cal_gui.title(player_index, gui_root)
 	flow.add{
 		type = "sprite-button",
 		name = "recexplo_remove_all_cal",
-		sprite = "remove-icon"
+		sprite = "remove-icon",
+		style = "recexplo_sprite_button"
 	}
 	flow.add{
 		type = "button",
@@ -503,6 +511,7 @@ function recexplo.cal_gui.draw_cal(player_index, gui_root)
 
 	--io begin
 	if cal_gui[i] then
+		--game.print("draw begin io")
 		recexplo.cal_gui.draw_io(player_index, gui_root, "input")
 	end
 	--products/recipes
@@ -576,13 +585,15 @@ function recexplo.cal_gui.draw_cal_recipe_title(gui_root, cal_recipe, cal_recipe
 	table.add{
 		type = "sprite-button",
 		name = recexplo.prefix_display_recipe .. recipe.name,
-		--sprite = "eye-icon"
-		sprite = "add-to-history-icon"
+		--sprite = "eye-icon",
+		sprite = "add-to-history-icon",
+		style = "recexplo_sprite_button"
 	}
 	table.add{
 		type = "sprite-button",
 		name =  recexplo.prefix_remove_cal .. cal_recipe_index,
-		sprite = "remove-icon"
+		sprite = "remove-icon",
+		style = "recexplo_sprite_button"
 	}
 end
 function recexplo.cal_gui.draw_cal_recipe_made_in_container(gui_root, cal_recipe_index, cal_recipe)
