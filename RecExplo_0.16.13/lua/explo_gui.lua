@@ -115,6 +115,12 @@ function recexplo.gui.draw_product_selection(player_index, gui_root)
 end
 function recexplo.gui.draw_select_button(player_index, gui_root)
 	local signal = global[player_index].selctet_product_signal
+	--[[if signal then
+		game.print(signal)
+	else
+		game.print("nil")
+	end]]
+	
 	local frame = gui_root.add{
 		type = "frame",
 		name = "selected_history_item_frame",
@@ -141,7 +147,7 @@ function recexplo.gui.draw_select_button(player_index, gui_root)
 		type = "choose-elem-button",
 		name = "recexplo_choose_elem_button",
 		elem_type = "signal",
-		signal = global[player_index].selctet_product_signal
+		signal = signal
 	}
 	
 end

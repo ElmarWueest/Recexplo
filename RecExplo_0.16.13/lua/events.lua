@@ -1,6 +1,7 @@
 
 require "lua/explo_gui"
 require "lua/open_tech"
+require "lua/history"
 
 script.on_event(defines.events.on_tick, function(event)
 	if game.tick % 31 == 0 then
@@ -346,5 +347,39 @@ script.on_event("recexplo-open-gui", function(event)
 		recexplo.gui.close(event.player_index)		
 	else
 		recexplo.gui.open(event.player_index)
+	end
+end)
+
+
+script.on_configuration_changed(function(configuration_changed_data)
+	--game.print("on_configuration_changed")
+	
+	for player_index, value in ipairs(global) do
+		--delete open windows
+		local gui_root = game.players[player_index].gui.left
+		if gui_root.recexplo_gui_frame then
+			gui_root.recexplo_gui_frame.destroy()
+		end
+		
+		--delete history
+		if global[player_index].cal_gui then global[player_index].cal_gui = {} end		
+		if global[player_index].cal_gui.is_open then global[player_index].cal_gui.is_open = false end
+		if global[player_index].cal_gui.is_recording then global[player_index].cal_gui.is_recording = false end
+		if global[player_index].gui.is_open then global[player_index].gui.is_open = false end	
+		
+		if global[player_index].selctet_product_signal then global[player_index].selctet_product_signal = nil end--{ type = "item", name = "piercing-rounds-magazine"} end --crude-oil
+		if global[player_index].display_mode then global[player_index].display_mode = "recipe" end --recipe, where_used, single_recipe
+		if global[player_index].pasting_enabled then global[player_index].pasting_enabled = true end
+		if global[player_index].pasting_recipe then global[player_index].pasting_recipe = nil end
+
+
+		if global[player_index].history then global[player_index].history = {} end	
+		if global[player_index].history.length then global[player_index].history.length = 0 end	
+		if global[player_index].history.pos then global[player_index].history.pos = 0 end
+		if global[player_index].history.insert_mode then global[player_index].history.insert_mode = true end
+
+		if global[player_index].selctet_product_signal then
+			global[player_index].selctet_product_signal = nil
+		end
 	end
 end)
