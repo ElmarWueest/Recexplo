@@ -222,7 +222,7 @@ function recexplo.cal_gui.add_recipe(player_index, recipe, product_name, insert_
 		cal_gui.end_index = cal_gui.end_index + 1
 	end
 
-	local made_in_list = recexplo.cal_gui.get_production_facilities(recipe)
+	local made_in_list = recexplo.cal_gui.get_production_facilities(player_index, recipe)
 
 	local stats = {
 		standard_consumption_rate = 0,
@@ -282,8 +282,8 @@ function recexplo.cal_gui.add_only_product_name(player_index, product_name, inse
 		cal_gui[cal_gui.end_index - 0.5] = product_name
 	end
 end
-function recexplo.cal_gui.get_production_facilities(recipe)
-	local made_in_list = recexplo.find_all_made_in_entity(recipe)
+function recexplo.cal_gui.get_production_facilities(player_index, recipe)
+	local made_in_list = recexplo.find_all_made_in_entity(player_index, recipe)
 	made_in_list.selected_entity_index = 0
 
 	local entity = made_in_list[made_in_list.selected_entity_index]
@@ -550,7 +550,8 @@ function recexplo.cal_gui.draw_recipe_cal(player_index, gui_root, cal_recipe, ca
 	--game.print("cal_gui.draw_recipe_cal")
 	local frame = gui_root.add{
 		type = "frame",
-		name = "cal_recipe_frame_" .. cal_recipe.recipe.name
+		name = "cal_recipe_frame_" .. cal_recipe.recipe.name,
+		style = "recexplo_recipe_frame"
 	}
 	local table = frame.add{
 		type = "table",
@@ -611,7 +612,7 @@ function recexplo.cal_gui.draw_cal_recipe_made_in_container(gui_root, cal_recipe
 	local table = table.add{
 		type = "table",
 		name = "cal_made_in_table",
-		style = "recexplo_selectable_table",
+		--style = "recexplo_selectable_table",
 		column_count = 4
 	}
 	recexplo.cal_gui.draw_cal_recipe_made_in(table, cal_recipe_index, cal_recipe)
@@ -936,13 +937,17 @@ end
 function recexplo.cal_gui.draw_io(player_index, gui_root, io_type)
 	local cal_gui = global[player_index].cal_gui
 
-	local frame = {type = "frame"}
+	local frame = {
+		type = "frame",
+		style = "recexplo_recipe_frame"
+	}
 	if io_type == "input" then
 		frame.name = "input_cal_recipe_frame"
 	elseif io_type == "output" then
 		frame.name = "output_cal_recipe_frame"
 	end
 	frame = gui_root.add(frame)
+
 	local table = frame.add{
 		type = "table",
 		name = "io_cal_recipe_table",

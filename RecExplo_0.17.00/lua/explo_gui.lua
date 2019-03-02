@@ -95,7 +95,7 @@ function recexplo.gui.draw_product_selection(player_index, gui_root)
 		type = "label",
 		name = "lable_selcted_item",
 		style = "recexplo_title_lst",
-		caption = {"recexplo-gui.selected-item", ":"}
+		caption = {"recexplo-gui.selected-item"}
 	}
 	--recexplo.history.debug(player_index)
 	local history = global[player_index].history
@@ -201,7 +201,8 @@ function recexplo.gui.draw_controlls(player_index, gui_root)
 	insert_mode_table.add{
 		type = "sprite-button",
 		name = "recexplo_del_history",
-		sprite = "remove-icon"
+		sprite = "remove-icon",
+		style = "recexplo_sprite_button"
 	}
 
 	local radiobutton_table = gui_root.controlls_table.add{
@@ -228,12 +229,14 @@ function recexplo.gui.draw_history_button(gui_root)
 	gui_root.add{
 		type = "button",
 		name = "recexplo_history_button_back",
-		caption = "◄"
+		caption = "",
+		style = "recexplo_back_button"
 	}
 	gui_root.add{
 		type = "button",
 		name = "recexplo_history_button_forward",
-		caption = "►"
+		caption = "",
+		style = "recexplo_forward_button"
 	}
 end
 
@@ -462,7 +465,8 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 	local frame = gui_root.add{
 		type = "frame",
 		name = "recipe_frame" .. recipe.name,
-		direction = "vertical"
+		direction = "vertical",
+		style = "recexplo_recipe_frame"
 	}.add{
 		type = "table",
 		name = "recipe_table_".. recipe.name,
@@ -529,7 +533,7 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 	end
 	
 	--made in
-	recexplo.gui.draw_made_in (frame, recipe)
+	recexplo.gui.draw_made_in (player_index, frame, recipe)
 	--required technology
 	recexplo.gui.draw_required_technologies(frame, recipe, player_index)
 end
@@ -631,7 +635,7 @@ function recexplo.gui.draw_recipe_energy(gui_root, recipe_energy)
 		caption = {"",recipe_energy}
 	}
 end
-function recexplo.gui.draw_made_in (gui_root, recipe)
+function recexplo.gui.draw_made_in (player_index, gui_root, recipe)
 	gui_root.add{
 		type = "label",
 		name = "label_ingredients",
@@ -645,7 +649,7 @@ function recexplo.gui.draw_made_in (gui_root, recipe)
 		column_count = 5
 	}
 	--game.print("recipe.category: " .. recipe.category)
-	local entity_list = recexplo.find_all_made_in_entity(recipe)
+	local entity_list = recexplo.find_all_made_in_entity(player_index, recipe)
 
 	for i = 0,entity_list.length do
 		if entity_list[i].name == "player" then
@@ -696,15 +700,15 @@ function recexplo.gui.draw_required_technologies(gui_root, recipe, player_index)
 					}
 					--find style
 					if technology.researched then
-						tech_button.style = "researched_technology_slot"
+						tech_button.style = "recexplo_researched_technology_slot"
 					else
 						for _, prerequisite in pairs(technology.prerequisites) do
 							if prerequisite and not prerequisite.researched then
-								tech_button.style = "not_available_technology_slot"
+								tech_button.style = "recexplo_unavailable_technology_slot"
 								goto done
 							end
 						end
-						tech_button.style = "available_technology_slot"
+						tech_button.style = "recexplo_available_technology_slot"
 						::done::
 					end
 
@@ -717,6 +721,7 @@ function recexplo.gui.draw_required_technologies(gui_root, recipe, player_index)
 						end
 					end
 					if is_single then
+						
 						table.add(tech_button)
 					end
 				end
