@@ -82,10 +82,12 @@ data.raw["gui-style"].default["recexplo_flow"] ={
 data.raw["gui-style"].default["recexplo_selection_frame"] ={
 	type = "frame_style",
 	parent = "frame",
-	top_padding = 0,
-	right_padding = 1,
-	bottom_padding = 1,
-	left_padding = 0,
+
+	top_padding = 1,
+	left_padding = 1,
+	right_padding = 2,
+	bottom_padding = 2,
+
 	graphical_set = {
 		type = "composition",
 		filename = "__core__/graphics/gui.png",
@@ -94,13 +96,20 @@ data.raw["gui-style"].default["recexplo_selection_frame"] ={
 		position = {0, 8}
 	}
 }
+data.raw["gui-style"].default["recexplo_recipe_frame"] ={
+	type = "frame_style",
+	parent = "frame",
+	horizontally_stretchable = "on",
+	vertically_stretchable = "on"
+}
+
 
 
 --label_style
 data.raw["gui-style"].default["recexplo_gui_title"] = {
 	type = "label_style",
 	font = "recexplo_lb",
-	font_color = {r=1, g=1, b=1},
+	font_color = {r=1, g=1, b=1}
 }
 data.raw["gui-style"].default["recexplo_object_naming_lst"] = {
 	type = "label_style",
@@ -138,11 +147,13 @@ data.raw["gui-style"].default["recexplo_label_factories"] = {
 
 --textfield_style
 data.raw["gui-style"].default["recexplo_textfield_factories_amount"] = {
-	type = "textfield_style",
-
-	minimal_width = 30,
+	type = "textbox_style",
 	font = "recexplo_s",
-	
+	width = 40,
+	vertical_align = "center",
+	horizontal_align = "left",
+	horizontally_stretchable = "on"
+
 }
 
 --button_style
@@ -150,7 +161,12 @@ data.raw["gui-style"].default["recexplo_button_midium_font"] = {
 	type = "button_style",
 	parent = "button",
 	font = "recexplo_m",
-	padding = 3
+
+	minimal_width = 57,
+
+	
+	right_padding = 4,
+	left_padding = 4,
 }
 data.raw["gui-style"].default["recexplo_made_in_button_unselected"] = {
 	type = "button_style",
@@ -161,10 +177,74 @@ data.raw["gui-style"].default["recexplo_made_in_button_unselected"] = {
 data.raw["gui-style"].default["recexplo_sprite_button"] = {
 	type = "button_style",
 	parent = "button",
-	scalable = false,
 	width = 40,
 	height = 40,
-	padding = 1,
+	padding = 0
+}
+data.raw["gui-style"].default["recexplo_back_button"] = {
+	type = "button_style",
+	parent = "back_button",
+	minimal_width = 30
+}
+data.raw["gui-style"].default["recexplo_forward_button"] = {
+	type = "button_style",
+	parent = "forward_button",
+	minimal_width = 30
+}
+
+--tech slot buttons
+data.raw["gui-style"].default["recexplo_unavailable_technology_slot"] = 
+{
+  type = "button_style",
+  parent = "red_slot_button",
+  height = 68,
+  width = 68,
+}
+data.raw["gui-style"].default["recexplo_researched_technology_slot"] = 
+{
+  type = "button_style",
+  parent = "green_slot_button",
+  height = 68,
+  width = 68,
+}
+data.raw["gui-style"].default["recexplo_available_technology_slot"] = 
+{
+  type = "button_style",
+  parent = "slot_button",
+
+  clicked_graphical_set = {
+    border = 1,
+    filename = "__core__/graphics/gui.png",
+    position = {
+      185,
+      72
+    },
+    scale = 1,
+    size = 36
+  },
+  default_graphical_set = {
+    border = 1,
+    filename = "__core__/graphics/gui.png",
+    position = {
+      111,
+      72
+    },
+    scale = 1,
+    size = 36
+  },
+  hovered_graphical_set = {
+    border = 1,
+    filename = "__core__/graphics/gui.png",
+    position = {
+      148,
+      72
+    },
+    scale = 1,
+    size = 36
+  },
+  
+  height = 68,
+  width = 68,
 }
 
 
@@ -186,15 +266,15 @@ for i=410, 1310, 100 do
 end
 
 --tabel_style
-data.raw["gui-style"].default["recexplo_selectable_table"] = {
+--[[data.raw["gui-style"].default["recexplo_selectable_table"] = {
 	type = "table_style",
 	parent = "table",
 
-	align = "center",
+	horizontal_align = "center",
 	vertical_align = "center",
 
 	padding = 2
-}
+}]]
 data.raw["gui-style"].default["recexplo_stats_table"] = {
 	type = "table_style",
 	parent = "table",
