@@ -85,7 +85,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 			end
 			return
 			
-		elseif string.find(event.element.name, recexplo.prefix_history_itme, 1) ~= nil then
+		--[[elseif string.find(event.element.name, recexplo.prefix_history_itme, 1) ~= nil then
 			local pos = tonumber(string.sub(event.element.name, string.len(recexplo.prefix_history_itme) + 1))
 			if event.button == defines.mouse_button_type.left then
 				global[player_index].history.pos = pos
@@ -95,7 +95,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 			
 			recexplo.history.load_selected(player_index)
 			recexplo.gui.update(player_index)
-			return
+			return]]
 			
 		elseif string.find(event.element.name, recexplo.prefix_recipe, 1) ~= nil then
 			local recipe = string.sub(event.element.name, string.len(recexplo.prefix_recipe) + 1)
@@ -139,12 +139,14 @@ script.on_event(defines.events.on_gui_click, function(event)
 			return
 
 		elseif event.element.name == "recexplo_history_button_back" then
-			recexplo.history.go_backward(player_index)
+		local history = recexplo.history.active_recipe_history(player_index)
+			recexplo.history.go_backward(history)
 			recexplo.gui.update(player_index)
 			return
 			
 		elseif event.element.name == "recexplo_history_button_forward" then
-			recexplo.history.go_forward(player_index)
+			local history = recexplo.history.active_recipe_history(player_index)
+			recexplo.history.go_forward(history)
 			recexplo.gui.update_product_selection(player_index)
 			--recexplo.gui.update(player_index)
 			return
@@ -158,17 +160,27 @@ script.on_event(defines.events.on_gui_click, function(event)
 			return
 		elseif event.element.name == "recexplo_recipe_choose_elem_button" then
 			if event.button == defines.mouse_button_type.right then
-				local delete_pos = global[player_index].history.pos
-				recexplo.history.delete_pos(player_index, delete_pos)
+				local history = recexplo.history.active_recipe_history(player_index)
+				recexplo.history.delete_active_pos(history)
 				recexplo.history.load_selected(player_index)
 				recexplo.gui.update(player_index)
 			end
 			return
 		elseif event.element.name == "recexplo_del_history" then
-			recexplo.history.delete(player_index)
+			recexplo.history.delete(game[player_index].local_history)
 			recexplo.history.load_selected(player_index)
 			recexplo.gui.update(player_index)
 			return
+		elseif event.element.name == global[player_index].global_history.placeholder_name then
+			global[player_index].global_history.pos = 1
+			global[player_index].local_history.pos = nil
+			return
+
+		elseif event.element.name == global[player_index].local_history.placeholder_name then
+			global[player_index].global_history.pos = nil
+			global[player_index].local_history.pos = 1
+			return
+
 		end
 	end
 	if global[player_index].cal_gui.is_open and global[player_index].gui.is_open then
@@ -233,12 +245,15 @@ script.on_event(defines.events.on_gui_elem_changed, function(event)
 			elseif not(global[player_index].selctet_product_signal) or event.element.elem_value.name ~= global[player_index].selctet_product_signal.name then
 				global[player_index].selctet_product_signal = event.element.elem_value
 
-				recexplo.history.add_current_state(player_index)
+				local data = recexplo.history.explo_gui_pack_data(player_index)
+				local history = recexplo.history.active_recipe_history(player_index)
+				recexplo.history.add_state(history, player_index, data)
+
 				recexplo.gui.update(player_index)
 			end
 		else
-			local delete_pos = global[player_index].history.pos
-			recexplo.history.delete_pos(player_index, delete_pos)
+			local history = recexplo.history.active_recipe_history(player_index)
+			recexplo.history.delete_active_pos(history)
 			recexplo.history.load_selected(player_index)
 			recexplo.gui.update(player_index)
 		end
@@ -258,7 +273,8 @@ script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 			if global[player_index].display_mode == "recipe" then
 				global[player_index].display_mode = "where_used"
 			end
-			recexplo.history.save_state(player_index, global[player_index].history.pos)
+			local history = recexplo.history.active_recipe_history(player_index)
+			recexplo.history.save_state(history, recexplo.history.explo_gui_pack_data(player_index))
 			recexplo.gui.update(player_index)
 	
 		elseif event.element.name == "recexplo_insert_mode" then

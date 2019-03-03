@@ -1,9 +1,8 @@
 
 
-function recexplo.history.add_current_state(player_index)
+function recexplo.history.add_state(history, player_index, data)
+	--copy_funktion = funktion(source, destination)
 	local max_length = game.players[player_index].mod_settings["recexplo-max-history-length"].value
-	local history = global[player_index].history
-    --game.print("add_current_state")
     --game.print("debug start",{r=1})
     --recexplo.history.debug(player_index)
 
@@ -16,63 +15,53 @@ function recexplo.history.add_current_state(player_index)
 			for i = 1, (max_length - 1), 1 do
 				history[i] = history[i+1]
 			end
-			recexplo.history.save_state(player_index, history.pos)
+			history[history.pos] = data
 		else 
             -- grow in size
             --game.print("grow in size",{g=1})
 			history.length = history.length + 1
 			history.pos = history.pos + 1
-			recexplo.history.save_state(player_index, history.pos)
+			history[history.pos] = data
 		end
 	else
         --pos is not on the end
         --game.print("pos is not on the end",{g=1})
-		if history.insert_mode then
-			if history.max_length == max_length then
-                --shift back
-                --game.print("shift back",{g=1})
-				for i = 1, history.pos -1, 1 do 
-					history[i] = history[i+1]
-				end
-				recexplo.history.save_state(player_index, history.pos)
-			else 
-                --shift forward
-                --game.print("shift forward",{g=1})
-				for i = history.length +1, history.pos +1, -1 do
-					history[i] = history[i-1]
-				end
-				history.pos = history.pos +1
-				history.length = history.length +1
-				recexplo.history.save_state(player_index, history.pos)
+		if history.max_length == max_length then
+            --shift back
+            --game.print("shift back",{g=1})
+			for i = 1, history.pos -1, 1 do 
+				history[i] = history[i+1]
 			end
+			history[history.pos] = data
 		else 
-            --overwrith
-            --game.print("overwrith",{g=1})
-			history.pos = history.pos + 1
-			recexplo.history.save_state(player_index, history.pos)
+            --shift forward
+            --game.print("shift forward",{g=1})
+			for i = history.length +1, history.pos +1, -1 do
+				history[i] = history[i-1]
+			end
+			history.pos = history.pos +1
+			history.length = history.length +1
+			history[history.pos] = data
 		end
     end
     
     --game.print("debug end",{r=1})
 	--recexplo.history.debug(player_index)
 end
-function recexplo.history.save_state(player_index, pos)
-    global[player_index].history[pos] = {}
-
-    if global[player_index].selctet_product_signal then
-        global[player_index].history[pos].signal = {}
-	    global[player_index].history[pos].signal.name = global[player_index].selctet_product_signal.name
-        global[player_index].history[pos].signal.type = global[player_index].selctet_product_signal.type
-    end
-	global[player_index].history[pos].display_mode = global[player_index].display_mode
+function recexplo.history.save_state(history, data)
+    history[history.pos] = data
 end
 
-function recexplo.history.delete_pos(player_index, delete_pos)
-	--game.print("delete_pos")
+function recexplo.history.delete_active_pos(history)
+	if history.pos ~= nil then
+		recexplo.history.delete_pos(history, history.pos)
+	end
+end
+function recexplo.history.delete_pos(history, delete_pos)
+	--game.print("pos")
 	--game.print("debug start",{r=1})
 	--recexplo.history.debug(player_index)
 	
-	local history = global[player_index].history	
 	if history.length == delete_pos then
 		--pos is on the end
 		history[delete_pos] = nil
@@ -96,8 +85,7 @@ function recexplo.history.delete_pos(player_index, delete_pos)
 	--game.print("debug end",{r=1})
 	--recexplo.history.debug(player_index)
 end
-function recexplo.history.delete(player_index)
-	local history = global[player_index].history	
+function recexplo.history.delete(history)
 	for i = 1, history.length, 1 do
 		history[i] = nil
 	end
@@ -105,11 +93,11 @@ function recexplo.history.delete(player_index)
     history.pos = 0
 end
 
-function recexplo.history.load_selected(player_index)
-    local pos = global[player_index].history.pos
-    recexplo.history.load(player_index, pos)
-end
-function recexplo.history.load(player_index, pos)
+--[[function recexplo.history.return_selected(history)
+    local pos = history.pos
+	return history[pos]
+end]]
+--[[function recexplo.history.load(player_index, pos)
     --game.print("recexplo.history.load/pos: ".. tostring(pos))
     local history = global[player_index].history
     if pos > 0 then
@@ -124,49 +112,58 @@ function recexplo.history.load(player_index, pos)
 		end
         global[player_index].display_mode = "recipe"
     end
-end
+end]]
 
 
-function recexplo.history.go_forward(player_index)
-	local history = global[player_index].history
+function recexplo.history.go_forward(history)
 	local pos = history.pos
 	if pos < history.length then
 		temp = history[pos + 1]
 		history[pos + 1] = history[pos]
 		history[pos] = temp
 		history.pos = pos + 1
-
-		recexplo.history.load_selected(player_index)
 	end
 end
-function recexplo.history.go_backward(player_index)
-	--[[local history = global[player_index].history
-	if history.pos > 1 then
-		history.pos = history.pos - 1
-		recexplo.history.load_selected(player_index)
-
-		--game.print("history_go_backward")
-		--recexplo.history.debug(player_index)
-	end]]
-
-	local history = global[player_index].history
+function recexplo.history.go_backward(history)
 	local pos = history.pos
 	if pos > 1 then
 		temp = history[pos - 1]
 		history[pos - 1] = history[pos]
 		history[pos] = temp
 		history.pos = pos - 1
-
-		recexplo.history.load_selected(player_index)
 	end
 end
 
+function recexplo.history.active_recipe_history(player_index)
+	if global[player_index].global_history.pos then
+		return global[player_index].global_history
+	elseif global[player_index].local_history.pos then
+		return global[player_index].local_history
+	else
+		return nil
+	end
+end
+function recexplo.history.explo_gui_pack_data(player_index)
+	local data = {}
 
-function recexplo.history.debug(player_index)
-	local history = global[player_index].history
-	game.print("length: " .. history.length,{r=1;g=1})
-    game.print("pos: " .. history.pos,{r=1;g=1})
+	data.signal = global[player_index].selctet_product_signal
+	data.display_mode = global[player_index].display_mode
 
+	return data
+end
+function recexplo.history.explo_gui_unpack_data(player_index, data)
+	global[player_index].selctet_product_signal = data.signal
+	global[player_index].display_mode = data.display_mode
+end
+
+function recexplo.history.debug(history)
+	local color = {r=math.random(0,255);g=math.random(0,255);b=math.random(0,255)}
+	game.print("length: " .. history.length, color)
+	if history.pos ~= nil then
+    	game.print("pos: " .. history.pos, color)
+	else
+		game.print("pos: nil", color)
+	end
     --signal.name
 	local i = 1
 	local text = ""
@@ -176,7 +173,7 @@ function recexplo.history.debug(player_index)
 		i = i + 1
 		goto start
 	end
-    game.print("history stack: " .. text,{r=1;g=1})
+    game.print("history stack: " .. text,color)
     
     --display_mode
 	local i = 1
@@ -187,6 +184,6 @@ function recexplo.history.debug(player_index)
 		i = i + 1
 		goto start2
 	end
-	game.print("display_mode stack: " .. text,{r=1;g=1})
+	game.print("display_mode stack: " .. text,color)
 end
 
