@@ -338,7 +338,13 @@ script.on_event(defines.events.on_player_selected_area,function(event)
 end)
 
 script.on_event(defines.events.on_player_main_inventory_changed, function(event)
-	local inventory = game.players[event.player_index].get_inventory(defines.inventory.player_main)
+	local player = game.players[event.player_index]
+	local inventory = player.get_inventory(defines.inventory.player_main)
+	
+	if inventory == nil then
+		inventory = player.get_inventory(defines.inventory.god_main)
+	end
+	
 	inventory.remove({name ="recexplo-pasting-tool", count = 1000})
 end)
 
