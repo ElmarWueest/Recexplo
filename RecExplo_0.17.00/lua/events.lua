@@ -1,6 +1,5 @@
 
 require "lua/explo_gui"
-require "lua/open_tech"
 require "lua/history"
 
 script.on_event(defines.events.on_tick, function(event)
@@ -9,13 +8,6 @@ script.on_event(defines.events.on_tick, function(event)
 			recexplo.create_global_table(player.index)
 		end
 
-	end
-	if recexplo.had_opened_tech then
-		if recexplo.had_opened_tech > 1 then
-			recexplo.had_opened_tech = recexplo.had_opened_tech - 1
-		elseif recexplo.had_opened_tech == 1 then
-			recexplo.gui.pasting_old_technology(event.player_index)
-		end
 	end
 end)
 
@@ -124,9 +116,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 			if player.mod_settings["recexplo-enable-experimental-features"].value then
 				local tech_name = string.sub(event.element.name, string.len(recexplo.prefix_technology) + 1)
 				local tech = player.force.technologies[tech_name]
-				if tech and recexplo.had_opened_tech and recexplo.had_opened_tech == 0 then
-					recexplo.gui.open_tech(player, tech)
-				end
+				player.open_technology_gui(tech)
 			else
 				player.print({"recexplo-consol.enable-experimental-features"})
 			end

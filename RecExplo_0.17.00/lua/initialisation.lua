@@ -48,7 +48,6 @@ function recexplo.create_global_table(player_index)
 	
 
 	if not global then recexplo = {} end
-	recexplo.had_opened_tech = 0
 	if not global[player_index] then global[player_index] = {} end
 	if not global[player_index].gui then global[player_index].gui = {} end
 

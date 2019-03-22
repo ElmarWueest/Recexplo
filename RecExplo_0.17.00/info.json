@@ -9,5 +9,5 @@
   "github_path": "https://github.com/ElmarWueest/Recexplo",
   "homepage": "https://forums.factorio.com/viewtopic.php?f=92&t=56456",
   "id": 299792458,
-  "dependencies": [ "base >= 0.17.0" ]
+  "dependencies": [ "base >= 0.17.17" ]
 }
