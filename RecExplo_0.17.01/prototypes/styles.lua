@@ -71,10 +71,7 @@ data:extend({
 
 --flow_style
 data.raw["gui-style"].default["recexplo_flow"] ={
-	type = "flow_style",
-	parent = "flow",
-	horizontal_spacing = 0,
-	vertical_spacing = 0,
+	type = "horizontal_flow_style"
 }
 
 
@@ -96,11 +93,22 @@ data.raw["gui-style"].default["recexplo_selection_frame"] ={
 		position = {0, 8}
 	}
 }
+data.raw["gui-style"].default["recexplo_frame"] ={
+	type = "frame_style",
+	parent = "frame",
+	top_padding = 2,
+	bottom_padding = 2,
+	left_padding = 4,
+	right_padding = 4
+}
 data.raw["gui-style"].default["recexplo_recipe_frame"] ={
 	type = "frame_style",
 	parent = "frame",
 	horizontally_stretchable = "on",
-	vertically_stretchable = "on"
+	vertically_stretchable = "on",
+
+	padding = 2,
+
 }
 
 
@@ -168,12 +176,12 @@ data.raw["gui-style"].default["recexplo_button_midium_font"] = {
 	right_padding = 4,
 	left_padding = 4,
 }
-data.raw["gui-style"].default["recexplo_made_in_button_unselected"] = {
+--[[data.raw["gui-style"].default["recexplo_made_in_button_unselected"] = {
 	type = "button_style",
 	parent = "slot_button",
 	font = "recexplo_m",
 	left_padding = 3
-}
+}]]
 data.raw["gui-style"].default["recexplo_sprite_button"] = {
 	type = "button_style",
 	parent = "button",
@@ -191,6 +199,30 @@ data.raw["gui-style"].default["recexplo_forward_button"] = {
 	parent = "forward_button",
 	minimal_width = 30
 }
+data.raw["gui-style"].default["recexplo_forward_button"] = {
+	type = "button_style",
+	parent = "forward_button",
+	minimal_width = 30
+}
+data.raw["gui-style"].default["recexplo_not_selected_button"] = {
+	type = "button_style",
+	parent = "slot_button",
+
+	top_margin = 2,
+	left_margin = 2,
+	right_margin = 3,
+	bottom_margin = 3
+}
+data.raw["gui-style"].default["recexplo_red_not_selected_button"] = {
+	type = "button_style",
+	parent = "red_slot_button",
+
+	top_margin = 2,
+	right_margin = 2,
+	bottom_margin = 3,
+	left_margin = 3
+}
+
 
 --tech slot buttons
 data.raw["gui-style"].default["recexplo_unavailable_technology_slot"] = 
@@ -250,13 +282,16 @@ data.raw["gui-style"].default["recexplo_available_technology_slot"] =
 
 
 --scroll_pane_style
+--explo_gui
 for i=300, 1200, 100 do
 	--local name = "recexplo_recipes_scroll_plane_" .. i
 	data.raw["gui-style"].default["recexplo_recipes_scroll_plane_" .. i] = {
 		type = "scroll_pane_style",
-		maximal_height = i
+		maximal_height = i,
+		extra_padding_when_activated = 3
 	}
 end
+--cal_gui
 for i=410, 1310, 100 do
 	--local name = "recexplo_recipes_scroll_plane_" .. i
 	data.raw["gui-style"].default["recexplo_recipes_scroll_plane_" .. i] = {
@@ -281,6 +316,19 @@ data.raw["gui-style"].default["recexplo_stats_table"] = {
 
 	horizontal_spacing = 3,
 	cell_spacing = 3
+}
+data.raw["gui-style"].default["recexplo_table"] = {
+	type = "table_style",
+	parent = "table",
 
+	horizontal_spacing = 0,
+	vertical_spacing = 0
+}
+data.raw["gui-style"].default["recexplo_recipe_table"] = {
+	type = "table_style",
+	parent = "table",
+
+	horizontal_spacing = 3,
+	vertical_spacing = 3
 }
 

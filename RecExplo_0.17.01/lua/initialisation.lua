@@ -2,6 +2,8 @@
 if not recexplo then recexplo = {} end
 if not recexplo.gui then recexplo.gui = {} end
 if not recexplo.cal_gui then recexplo.cal_gui = {} end
+if not recexplo.history then recexplo.history = {} end
+
 
 if not recexplo.prefix_item_button_product then recexplo.prefix_item_button_product = "recexplo_item_button_product_" end
 if not recexplo.prefix_item_button_ingredient then recexplo.prefix_item_button_ingredient = "recexplo_item_button_ingredient_" end
@@ -9,18 +11,17 @@ if not recexplo.prefix_made_in then recexplo.prefix_made_in = "recexplo_made_in_
 if not recexplo.prefix_made_in_player then recexplo.prefix_made_in_player = "recexplo_player_made_in_" end
 if not recexplo.prefix_recipe then recexplo.prefix_recipe = "recexplo_recipi_" end
 if not recexplo.prefix_technology then recexplo.prefix_technology = "recexplo_technology_" end
---if not recexplo.prefix_recipe_frame then recexplo.prefix_recipe_frame = "recexplo_recipe_frame_" end
 if not recexplo.prefix_remove_cal then recexplo.prefix_remove_cal = "recexplo_remove_cal_" end
 if not recexplo.prefix_cal_made_in then recexplo.prefix_cal_made_in = "recexplo_cal_made_in_index_" end
 if not recexplo.prefix_cal_factories_amount then recexplo.prefix_cal_factories_amount = "recexplo_cal_factories_amount_" end
-if not recexplo.prefix_display_recipe then recexplo.prefix_display_recipe = "prefix_display_recipe_" end
-if not recexplo.prefix_cal_item_button then recexplo.prefix_cal_item_button = "prefix_cal_item_button_" end
+if not recexplo.prefix_display_recipe then recexplo.prefix_display_recipe = "recexplo_prefix_display_recipe_" end
+if not recexplo.prefix_cal_item_button then recexplo.prefix_cal_item_button = "recexplo_prefix_cal_item_button_" end
+if not recexplo.prefix_recipe_frame then recexplo.prefix_recipe_frame = "recexplo_recipe_frame_" end
+if not recexplo.prefix_global_history_item then recexplo.prefix_global_history_item = "recexplo_global_history_item_" end
+if not recexplo.prefix_local_history_item then recexplo.prefix_local_history_item = "recexplo_local_history_item_" end
 
-if not recexplo.prefix_recipe_frame then recexplo.prefix_recipe_frame = "recipe_frame" end
+if not recexplo.history.global_history_list then recexplo.history.global_history_list = {} end	
 
-
-if not recexplo.history then recexplo.history = {} end	
-	
 
 if not recexplo.gui.recipes_display_columns then recexplo.gui.recipes_display_columns = 4 end
 
@@ -57,23 +58,25 @@ function recexplo.create_global_table(player_index)
 	recexplo.top_button(player_index)
 
 	if not global[player_index].gui.is_open then global[player_index].gui.is_open = false end	
-	if not global[player_index].selctet_product_signal then global[player_index].selctet_product_signal = nil end--{ type = "item", name = "piercing-rounds-magazine"} end --crude-oil
+	--if not global[player_index].selctet_product_signal then global[player_index].selctet_product_signal = nil end--{ type = "item", name = "piercing-rounds-magazine"} end --crude-oil
 	if not global[player_index].display_mode then global[player_index].display_mode = "recipe" end --recipe, where_used, single_recipe
 	if not global[player_index].pasting_enabled then global[player_index].pasting_enabled = true end
-	if not global[player_index].pasting_recipe then global[player_index].pasting_recipe = nil end
+	--if not global[player_index].pasting_recipe then global[player_index].pasting_recipe = nil end
 	
 	
 	if not global[player_index].global_history then global[player_index].global_history = {} end	
+	if not global[player_index].global_history.list then global[player_index].global_history.list = recexplo.history.global_history_list end	
 	if not global[player_index].global_history.length then global[player_index].global_history.length = 0 end	
-	if not global[player_index].global_history.pos then global[player_index].global_history.pos = nil end
-	if not global[player_index].global_history.prefix_history_itme then global[player_index].global_history.prefix_history_itme = "recexplo_global_history_item_" end
-	if not global[player_index].global_history.placeholder_name then global[player_index].global_history.placeholder_name = "global_history_placehodler" end
+	if not global[player_index].global_history.pos then global[player_index].global_history.pos = -1 end
+	if not global[player_index].global_history.prefix_history_itme then global[player_index].global_history.prefix_history_itme = recexplo.prefix_global_history_item end
+	if not global[player_index].global_history.placeholder_name then global[player_index].global_history.placeholder_name = "recexplo_global_history_placehodler" end
 
 	if not global[player_index].local_history then global[player_index].local_history = {} end	
+	if not global[player_index].local_history.list then global[player_index].local_history.list = {} end	
 	if not global[player_index].local_history.length then global[player_index].local_history.length = 0 end	
 	if not global[player_index].local_history.pos then global[player_index].local_history.pos = 0 end
-	if not global[player_index].local_history.prefix_history_itme then global[player_index].local_history.prefix_history_itme = "recexplo_local_history_item_" end
-	if not global[player_index].local_history.placeholder_name then global[player_index].local_history.placeholder_name = "local_history_placehodler" end
+	if not global[player_index].local_history.prefix_history_itme then global[player_index].local_history.prefix_history_itme = recexplo.prefix_local_history_item end
+	if not global[player_index].local_history.placeholder_name then global[player_index].local_history.placeholder_name = "recexplo_local_history_placehodler" end
 
 
 	local was_set = 0

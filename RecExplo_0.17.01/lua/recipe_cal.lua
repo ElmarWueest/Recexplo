@@ -124,7 +124,9 @@ end
 function recexplo.cal_gui.tray_add_recipe(event, product_name, insert_mode)
 	--game.print("cal_gui.tray_add_recipe")
 	local player_index = event.player_index
-	local recipe_name = string.sub(event.element.parent.parent.parent.parent.name, string.len(recexplo.prefix_recipe_frame) + 1)
+	
+	--game.print("event.element.parent.parent.parent.name: " .. event.element.parent.parent.parent.name)
+	local recipe_name = string.sub(event.element.parent.parent.parent.name, string.len(recexplo.prefix_recipe_frame) + 1)
 	local recipe = game.recipe_prototypes[recipe_name]
 
 	if global[player_index].cal_gui.is_recording then
@@ -588,6 +590,7 @@ function recexplo.cal_gui.draw_cal_recipe_title(gui_root, cal_recipe, cal_recipe
 		name = recexplo.prefix_display_recipe .. recipe.name,
 		--sprite = "eye-icon",
 		sprite = "add-to-history-icon",
+		tooltip = {"recexplo-gui.add-to-history"},
 		style = "recexplo_sprite_button"
 	}
 	table.add{
@@ -612,7 +615,7 @@ function recexplo.cal_gui.draw_cal_recipe_made_in_container(gui_root, cal_recipe
 	local table = table.add{
 		type = "table",
 		name = "cal_made_in_table",
-		--style = "recexplo_selectable_table",
+		style = "recexplo_table",
 		column_count = 4
 	}
 	recexplo.cal_gui.draw_cal_recipe_made_in(table, cal_recipe_index, cal_recipe)
@@ -639,7 +642,7 @@ function recexplo.cal_gui.draw_cal_recipe_made_in(gui_root, cal_recipe_index, ca
 			gui_root.add{
 				type = "sprite-button",
 				name = recexplo.prefix_cal_made_in .. cal_recipe_index .. "/" .. i,
-				style = "recexplo_made_in_button_unselected",
+				style = "recexplo_not_selected_button",
 				sprite = "entity/" .. entity.name,
 				tooltip = entity.localised_name
 			}
@@ -903,7 +906,8 @@ function recexplo.cal_gui.calcualte_io_crafting_speed(made_in_list)
 		else
 			local selected_entity =  made_in_list[made_in_list.selected_entity_index]
 			if selected_entity.type == "transport-belt" then
-				made_in_list.crafting_speed = (selected_entity.belt_speed / (9/32)) * 60 * 2
+				game.print(selected_entity.belt_speed)
+				made_in_list.crafting_speed = selected_entity.belt_speed * 60 * 8
 			end
 		end
 	end

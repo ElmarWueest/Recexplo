@@ -10,7 +10,8 @@ function recexplo.gui.open(player_index)
 		gui = gui.add{
 			type = "flow",
 			name = "recexplo_flow",
-			direction = "horizontal"
+			direction = "horizontal",
+			style = "recexplo_flow"
 		}
 	else
 		gui = gui.recexplo_flow
@@ -19,7 +20,8 @@ function recexplo.gui.open(player_index)
 		local window = gui.add{
 			type = "frame",
 			name = "recexplo_gui_frame",
-			direction = "vertical" --horizontal		vertical
+			direction = "vertical",
+			style = "recexplo_frame"
 		}.add{
 			type = "table",
 			name = "recexplo_gui_table",
@@ -33,8 +35,8 @@ function recexplo.gui.open(player_index)
 		local table_item_selection = window.add{
 			type = "table",
 			name = "table_item_selection",
-			column_count = 1,
-			style = "table"
+			column_count = 2,
+			style = "recexplo_table"
 		}
 		recexplo.gui.draw_product_selection(player_index, table_item_selection)
 
@@ -90,104 +92,111 @@ function recexplo.gui.draw_title(gui_root)
 
 end
 function recexplo.gui.draw_product_selection(player_index, gui_root)
-	local global_history = gui_root.add{
-		type = "table",
-		name = "global_history",
-		column_count = 1000,
-		style = "table"
-	}
-	global_history.add{
-		type = "label",
-		name = "lable_global_history",
-		style = "recexplo_title_lst",
-		caption = {"recexplo-gui.selected-item"}
-	}
-	recexplo.gui.draw_history(global[player_index].global_history, global_history)
+	if game.players[player_index].mod_settings["recexplo-enable-experimental-features"].value then
+		gui_root.add{
+			type = "label",
+			name = "lable_global_history",
+			style = "recexplo_title_lst",
+			caption = {"recexplo-gui.global-history"}
+		}
+		local global_history = gui_root.add{
+			type = "table",
+			name = "global_history_table",
+			column_count = 1000,
+			style = "recexplo_table"
+		}
+		recexplo.gui.draw_history(player_index, global[player_index].global_history, global_history)
+	end
 
-	local local_history = gui_root.add{
-		type = "table",
-		name = "local_history",
-		column_count = 1000,
-		style = "table"
-	}
-	local_history.add{
+	gui_root.add{
 		type = "label",
 		name = "lable_local_history",
 		style = "recexplo_title_lst",
-		caption = {"recexplo-gui.local-history", ":"}
+		caption = {"recexplo-gui.local-history"}
 	}
-	recexplo.gui.draw_history(global[player_index].local_history, local_history)
+	local local_history = gui_root.add{
+		type = "table",
+		name = "local_history_table",
+		column_count = 1000,
+		style = "recexplo_table"
+	}
+	recexplo.gui.draw_history(player_index, global[player_index].local_history, local_history)
 
 end
-function recexplo.gui.draw_history(history, gui_root)
-	game.print("draw_product_selection")
-	game.print(tostring(gui_root))
-	recexplo.history.debug(history)
+function recexplo.gui.draw_history(player_index, history, gui_root)
+	--game.print("draw_product_selection")
+	--game.print(tostring(gui_root))
+	--recexplo.history.debug(history)
 
 	if history.length > 0 then
 		for i = 1, history.length,1 do
-			if history.pos ~= nil and i == history.pos then
-				game.print("draw_select_button i:"..tostring(i))
-				recexplo.gui.draw_select_button(gui_root)
+			if history.pos ~= -1 and i == history.pos then
+				--game.print("draw_select_button i:"..tostring(i))
+				recexplo.gui.draw_select_button(player_index, history, gui_root)
 			else
-				game.print("draw_history_item i:"..tostring(i))
+				--game.print("draw_history_item i:"..tostring(i))
 				recexplo.gui.draw_history_item(history, gui_root, i)
 			end
 		end
 	else
-		if history.pos == nil then
-			gui_root.add{
-				type = "sprite-button",
-				name = history.placeholder_name,
-				sprite = "add-to-history-icon",
-				style = "recexplo_sprite_button"
-			}	
+		if history.pos ~= -1 then
+			recexplo.gui.draw_select_button(player_index, history, gui_root)
 		else
-			recexplo.gui.draw_select_button(gui_root)
+			gui_root.add{
+				type = "choose-elem-button",
+				name = history.placeholder_name,
+				elem_type = "signal",
+				style = "recexplo_not_selected_button"
+			}
 		end
 	end
 end
-function recexplo.gui.draw_select_button(gui_root)
-	local signal = history
-	--[[if signal then
-		game.print(signal)
+function recexplo.gui.draw_select_button(player_index, history, gui_root)
+	--recexplo.gui.debug(player_index)
+
+	--game.print("draw_select_button:")
+	--recexplo.history.debug(history)
+
+	local signal
+	if history.pos ~= -1 and history.pos ~= 0 then
+		signal = global[player_index].selctet_product_signal
 	else
-		game.print("nil")
-	end]]
+		signal = nil
+	end	
+	--recexplo.gui.debug_signal(signal)
 	
 	local frame = gui_root.add{
 		type = "frame",
 		name = "selected_history_item_frame",
 		style = "recexplo_selection_frame"
 	}
+
 	if signal and signal.type == "recipe" then
-		local button = {
+		frame.add{
 			type = "sprite-button",
-			name = "recexplo_recipe_choose_elem_button",
-			
+			name = "recexplo_recipe_choose_elem_button",	
 			sprite = "recipe/" .. signal.name,
-			tooltip = game.recipe_prototypes[signal.name].localised_name
+			tooltip = game.recipe_prototypes[signal.name].localised_name,
+			style = "red_slot_button"
 		}
-		if signal.type == "item" or signal.type == "fluid" then
-			button.style = "slot_button"
-		else
-			button.style = "red_slot_button"
-		end
-		frame.add(button)
-		return
+
+	else
+		frame.add{
+			type = "choose-elem-button",
+			name = "recexplo_choose_elem_button",
+			elem_type = "signal",
+			signal = signal,
+			style = "slot_button"
+		}		
 	end
 
-	frame.add{
-		type = "choose-elem-button",
-		name = "recexplo_choose_elem_button",
-		elem_type = "signal",
-		signal = signal
-	}
 	
 end
 function recexplo.gui.draw_history_item(history, gui_root, i)
-	--recexplo.history.debug(player_index)
-	local i_signal = history[i].signal
+	--recexplo.history.debug(history)
+	--game.print(i)
+	--game.print(tostring(gui_root))
+	local i_signal = history.list[i].signal
 	local button = {
 		type = "sprite-button",
 		name = history.prefix_history_itme .. tostring(i)
@@ -196,15 +205,15 @@ function recexplo.gui.draw_history_item(history, gui_root, i)
 	if i_signal.type == "item" then
 		button.sprite = "item/" .. i_signal.name
 		button.tooltip = game.item_prototypes[i_signal.name].localised_name
-		button.style = "slot_button"
+		button.style = "recexplo_not_selected_button"
 	elseif i_signal.type == "fluid" then
 		button.sprite = "fluid/" .. i_signal.name
 		button.tooltip = game.fluid_prototypes[i_signal.name].localised_name
-		button.style = "slot_button"
+		button.style = "recexplo_not_selected_button"
 	elseif i_signal.type == "recipe" then
 		button.sprite = "recipe/" .. i_signal.name
 		button.tooltip = game.recipe_prototypes[i_signal.name].localised_name
-		button.style = "red_slot_button"
+		button.style = "recexplo_red_not_selected_button"
 	end
 	--game.print("i: " .. i .. ", i_signal.type: " .. i_signal.type)
 	gui_root.add(button)
@@ -237,7 +246,7 @@ function recexplo.gui.draw_controlls(player_index, gui_root)
 		type = "table",
 		name = "display_mode_table",
 		column_count = 2,
-		style = "table"
+		style = "recexplo_table"
 	}
 	recexplo.gui.draw_radio_buttons_display_mode(player_index, radiobutton_table)
 end
@@ -303,6 +312,7 @@ end
 function recexplo.gui.update_to_selectet_product(player_index, name, display_mode)
 	--game.print("update_to_selectet_product: " .. name .. " / " .. display_mode,{b=1})
 	local signal = global[player_index].selctet_product_signal
+	local history = recexplo.history.active_recipe_history(player_index)
 	local signal_type
 	if display_mode == "single_recipe" then
 		signal_type = "recipe"
@@ -321,13 +331,13 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 		if signal.name ~= name or signal.type ~= signal_type then
 			do_update = true
 		end
-		for	i, product in pairs(global[player_index].history) do
+		for	i, product in pairs(history) do
 			if tonumber(i) ~= nil then
 				--game.print(debug.traceback())
 				--game.print("product.name: " .. tostring(product.name) .. ", name: " .. tostring(name) .. ", product.type: " .. tostring(product.type) .. ", signal_type: " .. tostring(ignal_type))
 				if product.name == name and product.type == signal_type then
-					global[player_index].history.pos = i
-					recexplo.history.load_selected(plglobal[player_index].history)
+					history.pos = i
+					recexplo.history.load_selected(history)
 				end
 			end
 		end
@@ -346,7 +356,7 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 		--game.print("signal.type: ".. signal.type,{g=0.3,b=1})
 		--game.print("global[player_index].display_mode: ".. global[player_index].display_mode,{g=0.3,b=1})
 
-		recexplo.history.add_state(global[player_index].history, player_index, explo_gui_pack_data(player_index))
+		recexplo.history.add_state(history, player_index, recexplo.history.explo_gui_pack_data(player_index))
 
 	elseif display_mode ~= global[player_index].display_mode then
 		global[player_index].display_mode = display_mode
@@ -379,9 +389,10 @@ function recexplo.gui.create_all_recipes_container(player_index, gui_root)
 	local recipes_display_columns = game.players[player_index].mod_settings["recexplo-amount-of-recipes-columns"].value
 	local recipe_gui_root = gui_root.scroll_pane_recipes.add{
 		type = "table",
-		name = "table_recies",
+		name = "table_recipes",
 		direction = "vertical",
-		column_count = recipes_display_columns
+		column_count = recipes_display_columns,
+		style = "recexplo_recipe_table"
 	}
 	--search for recipes(recipes)
 	if global[player_index].display_mode == "recipe" then
@@ -475,12 +486,12 @@ end
 --draw recipe
 function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 	--game.print("draw recipe: " .. recipe.name)
-	if gui_root["recipe_frame" .. recipe.name] then
+	if gui_root[recexplo.prefix_recipe_frame .. recipe.name] then
 		return
 	end
 	local frame = gui_root.add{
 		type = "frame",
-		name = "recipe_frame" .. recipe.name,
+		name = recexplo.prefix_recipe_frame .. recipe.name,
 		direction = "vertical",
 		style = "recexplo_recipe_frame"
 	}.add{
@@ -507,19 +518,14 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 		type = "sprite-button",
 		name = recexplo.prefix_display_recipe .. recipe.name,
 		sprite = "add-to-history-icon",
+		tooltip = {"recexplo-gui.add-to-history"},
 		style = "recexplo_sprite_button"
 	}
 	
 	recexplo.gui.draw_recipe_energy(frame, recipe.energy)
 
 	--products
-	local product_table = frame.add{
-		type = "table",
-		name = "products_flow_" .. recipe.name,
-		column_count = 1,
-		style = "table"
-	}
-	product_table.add{
+	frame.add{
 		type = "label",
 		name = "label_product",
 		style = "recexplo_sub_title_lst",
@@ -527,25 +533,20 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 	}
 	local i = 0
 	for _, product in pairs(recipe.products) do
+		recexplo.gui.draw_product(player_index, frame, product, i)
 		i = i + 1
-		recexplo.gui.draw_product(player_index, product_table, product, i)
 	end
 	
 	--ingredients
-	local ingredient_table = frame.add{
-		type = "table",
-		name = "ingredients_flow_" .. recipe.name,
-		style = "table",
-		column_count = 1
-	}
-	ingredient_table.add{
+	frame.add{
 		type = "label",
 		name = "label_ingredients",
 		style = "recexplo_sub_title_lst",
 		caption = {"recexplo-gui.ingredients"}
 	}
 	for _, ingredient in pairs(recipe.ingredients) do
-		recexplo.gui.draw_ingredient(player_index, ingredient_table, ingredient)
+		recexplo.gui.draw_ingredient(player_index, frame, ingredient, i)
+		i = i + 1
 	end
 	
 	--made in
@@ -557,7 +558,7 @@ function recexplo.gui.draw_product(player_index, gui_root, product, i)
 	--game.print(product.name)
 	local product_table = gui_root.add{
 		type = "table",
-		name = "product_table_" .. product.name .. i,
+		name = "product_table_" .. tostring(i),
 		column_count = 2,
 		style = "table"
 	}
@@ -572,10 +573,10 @@ function recexplo.gui.draw_product(player_index, gui_root, product, i)
 	
 	recexplo.gui.draw_product_button(player_index, product_table, product, amount, "product")
 end
-function recexplo.gui.draw_ingredient(player_index, gui_root, ingredient)
+function recexplo.gui.draw_ingredient(player_index, gui_root, ingredient, i)
 	local ingredient_table = gui_root.add{
 		type = "table",
-		name = "ingredient_table_" .. ingredient.name,
+		name = "ingredient_table_" .. tostring(i),
 		column_count = 2,
 		style = "table"
 	}
@@ -654,7 +655,7 @@ end
 function recexplo.gui.draw_made_in (player_index, gui_root, recipe)
 	gui_root.add{
 		type = "label",
-		name = "label_ingredients",
+		name = "label_made_in",
 		style = "recexplo_sub_title_lst",
 		caption = {"recexplo-gui.made-in"}
 	}
@@ -743,5 +744,28 @@ function recexplo.gui.draw_required_technologies(gui_root, recipe, player_index)
 				end
 			end
 		end
+	end
+end
+
+--debug
+function recexplo.gui.debug(player_index)
+	local color = {r=math.random(0,255);g=math.random(0,255);b=math.random(0,255)}
+	game.print("recexplo.gui variables:", color)
+
+	local signal = global[player_index].selctet_product_signal
+	recexplo.gui.debug_signal(signal, color)
+
+	game.print("display_mode: " .. global[player_index].display_mode, color)
+end
+function recexplo.gui.debug_signal(signal, color)
+	if color == nil then
+		color =  {r=math.random(0,255);g=math.random(0,255);b=math.random(0,255)}
+	end
+
+	if signal then
+		local text = "signal / pos: " .. signal.type .. " / name: " .. signal.name
+		game.print(text, color)
+	else
+		game.print("signal: nil", color)
 	end
 end

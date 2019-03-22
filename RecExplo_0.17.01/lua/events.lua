@@ -1,6 +1,5 @@
 
 require "lua/explo_gui"
-require "lua/open_tech"
 require "lua/history"
 
 script.on_event(defines.events.on_tick, function(event)
@@ -8,7 +7,6 @@ script.on_event(defines.events.on_tick, function(event)
 		for i, player in pairs(game.connected_players) do
 			recexplo.create_global_table(player.index)
 		end
-
 	end
 	if recexplo.had_opened_tech then
 		if recexplo.had_opened_tech > 1 then
@@ -85,18 +83,44 @@ script.on_event(defines.events.on_gui_click, function(event)
 			end
 			return
 			
-		--[[elseif string.find(event.element.name, recexplo.prefix_history_itme, 1) ~= nil then
-			local pos = tonumber(string.sub(event.element.name, string.len(recexplo.prefix_history_itme) + 1))
-			if event.button == defines.mouse_button_type.left then
-				global[player_index].history.pos = pos
-			elseif event.button == defines.mouse_button_type.right then
-				recexplo.history.delete_pos(player_index, pos)
+		elseif string.find(event.element.name, recexplo.prefix_global_history_item, 1) ~= nil then
+			local pos = tonumber(string.sub(event.element.name, string.len(recexplo.prefix_global_history_item) + 1))
+			local history = global[player_index].global_history
+
+			if history.pos == -1 then
+				history.pos = pos
+				global[player_index].local_history.pos = -1
 			end
 			
-			recexplo.history.load_selected(player_index)
+			if event.button == defines.mouse_button_type.left then
+				history.pos = pos
+			elseif event.button == defines.mouse_button_type.right then
+				
+				recexplo.history.delete_pos(history, pos)
+			end
+	
+			recexplo.history.explo_gui_unpack_data(player_index, history.list[history.pos])
 			recexplo.gui.update(player_index)
-			return]]
+			return
+		elseif string.find(event.element.name, recexplo.prefix_local_history_item, 1) ~= nil then
+			local pos = tonumber(string.sub(event.element.name, string.len(recexplo.prefix_local_history_item) + 1))
+			local history = global[player_index].local_history
+
+			if history.pos == -1 then
+				history.pos = pos
+				global[player_index].global_history.pos = -1
+			end
+
+			if event.button == defines.mouse_button_type.left then
+				history.pos = pos
+			elseif event.button == defines.mouse_button_type.right then
+				recexplo.history.delete_pos(history, pos)
+			end
 			
+			recexplo.history.explo_gui_unpack_data(player_index, history.list[history.pos])
+			recexplo.gui.update(player_index)
+			return
+
 		elseif string.find(event.element.name, recexplo.prefix_recipe, 1) ~= nil then
 			local recipe = string.sub(event.element.name, string.len(recexplo.prefix_recipe) + 1)
 			
@@ -121,15 +145,10 @@ script.on_event(defines.events.on_gui_click, function(event)
 			return
 			
 		elseif string.find(event.element.name, recexplo.prefix_technology, 1) ~= nil then
-			if player.mod_settings["recexplo-enable-experimental-features"].value then
-				local tech_name = string.sub(event.element.name, string.len(recexplo.prefix_technology) + 1)
-				local tech = player.force.technologies[tech_name]
-				if tech and recexplo.had_opened_tech and recexplo.had_opened_tech == 0 then
-					recexplo.gui.open_tech(player, tech)
-				end
-			else
-				player.print({"recexplo-consol.enable-experimental-features"})
-			end
+			local tech_name = string.sub(event.element.name, string.len(recexplo.prefix_technology) + 1)
+			local tech = player.force.technologies[tech_name]
+			game.players[player_index].open_technology_gui(tech_name)
+	
 			return
 			
 		elseif string.find(event.element.name, recexplo.prefix_display_recipe, 1) then
@@ -139,16 +158,15 @@ script.on_event(defines.events.on_gui_click, function(event)
 			return
 
 		elseif event.element.name == "recexplo_history_button_back" then
-		local history = recexplo.history.active_recipe_history(player_index)
+			local history = recexplo.history.active_recipe_history(player_index)
 			recexplo.history.go_backward(history)
-			recexplo.gui.update(player_index)
+			recexplo.gui.update_product_selection(player_index)
 			return
 			
 		elseif event.element.name == "recexplo_history_button_forward" then
 			local history = recexplo.history.active_recipe_history(player_index)
 			recexplo.history.go_forward(history)
 			recexplo.gui.update_product_selection(player_index)
-			--recexplo.gui.update(player_index)
 			return
 			
 		elseif event.element.name == "recexplo_open_cal_gui" then
@@ -158,27 +176,38 @@ script.on_event(defines.events.on_gui_click, function(event)
 				recexplo.cal_gui.open(player_index)
 			end
 			return
-		elseif event.element.name == "recexplo_recipe_choose_elem_button" then
+		--[[elseif event.element.name == "recexplo_recipe_choose_elem_button" then
+			gmae.print("recexplo_recipe_choose_elem_button was clicked")
 			if event.button == defines.mouse_button_type.right then
 				local history = recexplo.history.active_recipe_history(player_index)
 				recexplo.history.delete_active_pos(history)
-				recexplo.history.load_selected(player_index)
+				recexplo.history.explo_gui_unpack_data(player_index, history.list[history.pos])
 				recexplo.gui.update(player_index)
 			end
-			return
+			return]]
 		elseif event.element.name == "recexplo_del_history" then
-			recexplo.history.delete(game[player_index].local_history)
-			recexplo.history.load_selected(player_index)
+			local history = recexplo.history.active_recipe_history(player_index)
+			recexplo.history.delete(history)
+			recexplo.history.explo_gui_unpack_data(player_index, history.list[history.pos])
 			recexplo.gui.update(player_index)
 			return
+
 		elseif event.element.name == global[player_index].global_history.placeholder_name then
-			global[player_index].global_history.pos = 1
-			global[player_index].local_history.pos = nil
+			global[player_index].global_history.pos = 0
+			global[player_index].local_history.pos = -1
+
+			--game.print(global[player_index].global_history.placeholder_name)
+			--recexplo.history.debug(global[player_index].global_history)
+			--recexplo.history.debug(global[player_index].local_history)
 			return
 
 		elseif event.element.name == global[player_index].local_history.placeholder_name then
-			global[player_index].global_history.pos = nil
-			global[player_index].local_history.pos = 1
+			global[player_index].global_history.pos = -1
+			global[player_index].local_history.pos = 0
+
+			--game.print(global[player_index].local_history.placeholder_name)
+			--recexplo.history.debug(global[player_index].global_history)
+			--recexplo.history.debug(global[player_index].local_history)
 			return
 
 		end
@@ -234,9 +263,44 @@ script.on_event(defines.events.on_gui_click, function(event)
 		end
 	end
 	::exit::
+	--game.print("ende on_click")
+	--recexplo.history.debug(global[player_index].global_history)
+	--recexplo.history.debug(global[player_index].local_history)
 end)
 script.on_event(defines.events.on_gui_elem_changed, function(event)
+	local was_chaned = false
+	local history
+	local player_index = event.player_index
+	
+	--game.print("on_gui_elem_changed")
+	--game.print("global_history")
+	--recexplo.history.debug(global[player_index].global_history)
+	--game.print("local_history")
+	--recexplo.history.debug(global[player_index].local_history)
+
 	if event.element.name == "recexplo_choose_elem_button" then
+		--game.print("clickt on button: recexplo_choose_elem_button")
+		was_chaned = true
+		history = recexplo.history.active_recipe_history(player_index)
+	elseif event.element.name == global[player_index].global_history.placeholder_name then
+		--game.print("clickt on button: " .. 	global[player_index].global_history.placeholder_name)
+		was_chaned = true
+		global[player_index].global_history.pos = 0
+		global[player_index].local_history.pos = -1
+		history = global[player_index].global_history
+	elseif event.element.name == global[player_index].local_history.placeholder_name then
+		--game.print("clickt on button: " .. global[player_index].local_history.placeholder_name)
+		was_chaned = true
+		global[player_index].global_history.pos = -1
+		global[player_index].local_history.pos = 0
+		history = global[player_index].local_history
+	end
+
+
+	--game.print("was_chaned: " .. tostring(was_chaned))
+	--recexplo.history.debug(history)
+
+	if was_chaned == true then
 		local player_index = event.player_index
 		if event.element.elem_value then
 			if event.element.elem_value.type == "virtual" then
@@ -246,18 +310,26 @@ script.on_event(defines.events.on_gui_elem_changed, function(event)
 				global[player_index].selctet_product_signal = event.element.elem_value
 
 				local data = recexplo.history.explo_gui_pack_data(player_index)
-				local history = recexplo.history.active_recipe_history(player_index)
+				
 				recexplo.history.add_state(history, player_index, data)
-
-				recexplo.gui.update(player_index)
+				recexplo.history.explo_gui_unpack_data(player_index, history.list[history.pos])
+				recexplo.gui.update(player_index)	
 			end
 		else
-			local history = recexplo.history.active_recipe_history(player_index)
+			--local history = recexplo.history.active_recipe_history(player_index)
 			recexplo.history.delete_active_pos(history)
-			recexplo.history.load_selected(player_index)
+			recexplo.history.explo_gui_unpack_data(player_index, history.list[history.pos])
+
 			recexplo.gui.update(player_index)
 		end
 	end
+	--recexplo.history.debug(history)
+							
+	--game.print("global_history")
+	--recexplo.history.debug(global[player_index].global_history)
+	--game.print("local_history")
+	--recexplo.history.debug(global[player_index].local_history)
+
 end)
 script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 	local player_index = event.player_index
@@ -266,7 +338,8 @@ script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 			if global[player_index].display_mode == "where_used" then
 				global[player_index].display_mode = "recipe"
 			end
-			recexplo.history.save_state(player_index, global[player_index].history.pos)
+			local history = recexplo.history.active_recipe_history(player_index)
+			recexplo.history.save_state(history, recexplo.history.explo_gui_pack_data(player_index))
 			recexplo.gui.update(player_index)
 	
 		elseif event.element.name == "radiobutton_dm_where_used" then
@@ -354,7 +427,15 @@ script.on_event(defines.events.on_player_selected_area,function(event)
 end)
 
 script.on_event(defines.events.on_player_main_inventory_changed, function(event)
-	local inventory = game.players[event.player_index].get_inventory(defines.inventory.player_main)
+	--local inventory = game.players[event.player_index].get_inventory(defines.inventory.player_main)
+	
+	local player = game.players[event.player_index]
+	local inventory = player.get_inventory(defines.inventory.player_main)
+
+	if inventory == nil then
+		inventory = player.get_inventory(defines.inventory.god_main)
+	end
+
 	inventory.remove({name ="recexplo-pasting-tool", count = 1000})
 end)
 
@@ -388,11 +469,17 @@ script.on_configuration_changed(function(configuration_changed_data)
 		if global[player_index].pasting_enabled then global[player_index].pasting_enabled = true end
 		if global[player_index].pasting_recipe then global[player_index].pasting_recipe = nil end
 
-
-		if global[player_index].history then global[player_index].history = {} end	
-		if global[player_index].history.length then global[player_index].history.length = 0 end	
-		if global[player_index].history.pos then global[player_index].history.pos = 0 end
-		if global[player_index].history.insert_mode then global[player_index].history.insert_mode = true end
+		global[player_index].global_history = {} 	
+		global[player_index].global_history.length = 0 	
+		global[player_index].global_history.pos = -1 --(-1)= not selected
+		global[player_index].global_history.prefix_history_itme = recexplo.prefix_global_history_item 
+		global[player_index].global_history.placeholder_name = "recexplo_global_history_placehodler" 
+	
+		global[player_index].local_history = {} 	
+		global[player_index].local_history.length = 0 	
+		global[player_index].local_history.pos = 0 
+		global[player_index].local_history.prefix_history_itme = recexplo.prefix_local_history_item 
+		global[player_index].local_history.placeholder_name = "recexplo_local_history_placehodler" 
 
 		if global[player_index].selctet_product_signal then
 			global[player_index].selctet_product_signal = nil
