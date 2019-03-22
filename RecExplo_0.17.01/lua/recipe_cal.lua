@@ -906,7 +906,7 @@ function recexplo.cal_gui.calcualte_io_crafting_speed(made_in_list)
 		else
 			local selected_entity =  made_in_list[made_in_list.selected_entity_index]
 			if selected_entity.type == "transport-belt" then
-				game.print(selected_entity.belt_speed)
+				--game.print(selected_entity.belt_speed)
 				made_in_list.crafting_speed = selected_entity.belt_speed * 60 * 8
 			end
 		end
