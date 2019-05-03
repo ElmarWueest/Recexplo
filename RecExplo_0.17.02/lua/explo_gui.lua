@@ -64,11 +64,39 @@ function recexplo.gui.close(player_index)
 		end
 	end
 end
-function recexplo.gui.update(player_index)
+function recexplo.gui.update()
 	--game.print("update gui")
-	recexplo.gui.update_product_selection(player_index)
-	recexplo.gui.update_radio_buttons_display_mode(player_index)
-	recexplo.gui.update_results(player_index)
+	for _, player in pairs(game.players) do
+		local player_index = player.index
+		local update_flags = global[player_index].update_flags
+		local cal_gui_update_flags = global[player_index].cal_gui_update_flags
+
+		if global[player_index].gui.is_open then
+			if update_flags.history then
+				recexplo.gui.update_history(player_index)
+			end
+			if update_flags.results then
+				recexplo.gui.update_results(player_index)
+			end
+			if update_flags.radio_buttons_display_mode then
+				recexplo.gui.update_radio_buttons_display_mode(player_index)
+			end
+			if cal_gui_update_flags.results then
+				recexplo.cal_gui.update(player_index)
+			end
+			if cal_gui_update_flags.stats then
+				recexplo.cal_gui.update_stats(player_index)
+			end
+		end
+
+		update_flags.history = false
+		update_flags.results = false
+		update_flags.radio_buttons_display_mode = false
+
+		cal_gui_update_flags.results = false
+		cal_gui_update_flags.stats = false
+		cal_gui_update_flags.history = false
+	end
 end
 --draw/update controlls
 function recexplo.gui.draw_title(gui_root)
@@ -128,8 +156,8 @@ function recexplo.gui.draw_history(player_index, history, gui_root)
 	--game.print(tostring(gui_root))
 	--recexplo.history.debug(history)
 
-	if history.length > 0 then
-		for i = 1, history.length,1 do
+	if history.list.length > 0 then
+		for i = 1, history.list.length,1 do
 			if history.pos ~= -1 and i == history.pos then
 				--game.print("draw_select_button i:"..tostring(i))
 				recexplo.gui.draw_select_button(player_index, history, gui_root)
@@ -219,8 +247,7 @@ function recexplo.gui.draw_history_item(history, gui_root, i)
 	gui_root.add(button)
 end
 
-function recexplo.gui.update_product_selection(player_index)
-	--TODO: update to dual history
+function recexplo.gui.update_history(player_index)
 	local gui_root = game.players[player_index].gui.left.recexplo_flow.recexplo_gui_frame.recexplo_gui_table.table_item_selection
 	gui_root.clear()
 	recexplo.gui.draw_product_selection(player_index, gui_root)
@@ -346,8 +373,10 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 		signal = global[player_index].selctet_product_signal
 		do_update = true
 	end
-
+	
+	local do_gui_update = false
 	if do_update then
+		do_gui_update = true
 		signal.name = name
 		signal.type = signal_type
 		global[player_index].display_mode = display_mode
@@ -359,7 +388,30 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 		recexplo.history.add_state(history, player_index, recexplo.history.explo_gui_pack_data(player_index))
 
 	elseif display_mode ~= global[player_index].display_mode then
+		do_gui_update = true
 		global[player_index].display_mode = display_mode
+		recexplo.history.save_state(history, recexplo.history.explo_gui_pack_data(player_index))
+	end
+
+	if do_gui_update then
+		local update_flags = global[player_index].update_flags
+		update_flags.history = true
+		update_flags.results = true
+		update_flags.radio_buttons_display_mode = true
+
+		if history.name == "global" then
+			for _, player in pairs(game.players) do
+				other_player_index = player.index
+
+				if player_index ~= other_player_index then
+					global[other_player_index].update_flags.history = true
+
+					if global[other_player_index].global_history.pos == global[player_index].global_history.pos then
+						global[other_player_index].global_history.pos = global[other_player_index].global_history.pos +1
+					end
+				end
+			end
+		end
 	end
 
 end

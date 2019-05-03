@@ -21,7 +21,7 @@ if not recexplo.prefix_global_history_item then recexplo.prefix_global_history_i
 if not recexplo.prefix_local_history_item then recexplo.prefix_local_history_item = "recexplo_local_history_item_" end
 
 if not recexplo.history.global_history_list then recexplo.history.global_history_list = {} end	
-
+if not recexplo.history.global_history_list.length then recexplo.history.global_history_list.length = 0 end	
 
 if not recexplo.gui.recipes_display_columns then recexplo.gui.recipes_display_columns = 4 end
 
@@ -63,17 +63,29 @@ function recexplo.create_global_table(player_index)
 	if not global[player_index].pasting_enabled then global[player_index].pasting_enabled = true end
 	--if not global[player_index].pasting_recipe then global[player_index].pasting_recipe = nil end
 	
+
+	--update flags
+	if not global[player_index].update_flags then global[player_index].update_flags = {} end
+	if not global[player_index].update_flags.history then global[player_index].update_flags.history = false end
+	if not global[player_index].update_flags.results then global[player_index].update_flags.results = false end
+	if not global[player_index].update_flags.radio_buttons_display_mode then global[player_index].update_flags.radio_buttons_display_mode = false end
+	
+	if not global[player_index].cal_gui_update_flags then global[player_index].cal_gui_update_flags = {} end
+	if not global[player_index].cal_gui_update_flags.results then global[player_index].cal_gui_update_flags.results = false end
+	if not global[player_index].cal_gui_update_flags.stats then global[player_index].cal_gui_update_flags.stats = false end
+	if not global[player_index].cal_gui_update_flags.history then global[player_index].cal_gui_update_flags.history = false end
 	
 	if not global[player_index].global_history then global[player_index].global_history = {} end	
+	if not global[player_index].global_history.name then global[player_index].global_history.name = "global" end
 	if not global[player_index].global_history.list then global[player_index].global_history.list = recexplo.history.global_history_list end	
-	if not global[player_index].global_history.length then global[player_index].global_history.length = 0 end	
 	if not global[player_index].global_history.pos then global[player_index].global_history.pos = -1 end
 	if not global[player_index].global_history.prefix_history_itme then global[player_index].global_history.prefix_history_itme = recexplo.prefix_global_history_item end
 	if not global[player_index].global_history.placeholder_name then global[player_index].global_history.placeholder_name = "recexplo_global_history_placehodler" end
 
 	if not global[player_index].local_history then global[player_index].local_history = {} end	
+	if not global[player_index].local_history.name then global[player_index].local_history.name = "local" end
 	if not global[player_index].local_history.list then global[player_index].local_history.list = {} end	
-	if not global[player_index].local_history.length then global[player_index].local_history.length = 0 end	
+	if not global[player_index].local_history.list.length then global[player_index].local_history.list.length = 0 end	
 	if not global[player_index].local_history.pos then global[player_index].local_history.pos = 0 end
 	if not global[player_index].local_history.prefix_history_itme then global[player_index].local_history.prefix_history_itme = recexplo.prefix_local_history_item end
 	if not global[player_index].local_history.placeholder_name then global[player_index].local_history.placeholder_name = "recexplo_local_history_placehodler" end
@@ -105,7 +117,7 @@ function recexplo.version_update(player_index)
 			gui_root.recexplo_gui_frame.destroy()
 		end
 	end
-	global.version = "0.16.6"
+	global.version = "0.17.2"
 end
 
 function recexplo.top_button(player_index)

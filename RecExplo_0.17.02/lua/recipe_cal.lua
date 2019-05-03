@@ -138,10 +138,9 @@ function recexplo.cal_gui.tray_add_recipe(event, product_name, insert_mode)
 		elseif check == "only_product_name" then
 			recexplo.cal_gui.add_only_product_name(player_index, product_name, insert_mode)
 		--elseif check == "revers" then
-			
 		end
 
-		recexplo.cal_gui.update(player_index)
+		global[player_index].cal_gui_update_flags.results = true
 	else
 		--game.print("	is not recording")
 	end
@@ -769,8 +768,13 @@ function recexplo.cal_gui.draw_cal_factories(gui_root, stats)
 		caption = round(stats.factories_for_demand, 2)
 	}
 end
-function recexplo.cal_gui.draw_product_button(player_index, gui_root, product, product_type)
-	local sprite_button = gui_root.add{
+function recexplo.cal_gui.draw_product_button(player_index, gui_root, product, product_type, i)
+	local flow = gui_root.add{
+		type = "flow",
+		name = "flow_product_".. tostring(i),
+		style = "recexplo_flow"
+	}
+	flow.add{
 		type = "sprite-button",
 		name = recexplo.prefix_cal_item_button .. product.name,
 		style = "slot_button",

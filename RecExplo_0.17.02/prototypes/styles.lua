@@ -108,7 +108,7 @@ data.raw["gui-style"].default["recexplo_recipe_frame"] ={
 	vertically_stretchable = "on",
 
 	padding = 2,
-
+	--width = 208
 }
 
 
