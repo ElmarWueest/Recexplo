@@ -25,7 +25,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 	local player_index = event.player_index
 	local player = game.players[player_index]
 	
-	game.print("gui name on_gui_click:" .. event.element.name)
+	--game.print("gui name on_gui_click:" .. event.element.name)
 	if event.element.name == "b_recexplo" then
 		--player.print("clicked test button")
 		if global[player_index].gui.is_open then
