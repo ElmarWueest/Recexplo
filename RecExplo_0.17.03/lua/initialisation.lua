@@ -8,7 +8,7 @@ if not recexplo.history then recexplo.history = {} end
 if not recexplo.prefix_item_button_product then recexplo.prefix_item_button_product = "recexplo_item_button_product_" end
 if not recexplo.prefix_item_button_ingredient then recexplo.prefix_item_button_ingredient = "recexplo_item_button_ingredient_" end
 if not recexplo.prefix_made_in then recexplo.prefix_made_in = "recexplo_made_in_" end
-if not recexplo.prefix_made_in_player then recexplo.prefix_made_in_player = "recexplo_player_made_in_" end
+if not recexplo.prefix_made_in_character then recexplo.prefix_made_in_character = "recexplo_character_made_in_" end
 if not recexplo.prefix_recipe then recexplo.prefix_recipe = "recexplo_recipi_" end
 if not recexplo.prefix_technology then recexplo.prefix_technology = "recexplo_technology_" end
 if not recexplo.prefix_remove_cal then recexplo.prefix_remove_cal = "recexplo_remove_cal_" end
@@ -66,7 +66,8 @@ function recexplo.create_global_table(player_index)
 
 	--update flags
 	if not global[player_index].update_flags then global[player_index].update_flags = {} end
-	if not global[player_index].update_flags.history then global[player_index].update_flags.history = false end
+	if not global[player_index].update_flags.local_history then global[player_index].update_flags.local_history = false end
+	if not global[player_index].update_flags.global_history then global[player_index].update_flags.global_history = false end
 	if not global[player_index].update_flags.results then global[player_index].update_flags.results = false end
 	if not global[player_index].update_flags.radio_buttons_display_mode then global[player_index].update_flags.radio_buttons_display_mode = false end
 	

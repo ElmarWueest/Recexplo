@@ -32,13 +32,7 @@ function recexplo.gui.open(player_index)
 		recexplo.gui.draw_title(window)
 
 		--item selection
-		local table_item_selection = window.add{
-			type = "table",
-			name = "table_item_selection",
-			column_count = 2,
-			style = "recexplo_table"
-		}
-		recexplo.gui.draw_product_selection(player_index, table_item_selection)
+		recexplo.gui.draw_history_and_container(player_index, window)
 
 		--controlls
 		recexplo.gui.draw_controlls(player_index, window)
@@ -72,8 +66,11 @@ function recexplo.gui.update()
 		local cal_gui_update_flags = global[player_index].cal_gui_update_flags
 
 		if global[player_index].gui.is_open then
-			if update_flags.history then
-				recexplo.gui.update_history(player_index)
+			if update_flags.local_history then
+				recexplo.gui.update_local_history(player_index)
+			end
+			if update_flags.global_history then
+				recexplo.gui.update_global_history(player_index)
 			end
 			if update_flags.results then
 				recexplo.gui.update_results(player_index)
@@ -89,7 +86,8 @@ function recexplo.gui.update()
 			end
 		end
 
-		update_flags.history = false
+		update_flags.local_history = false
+		update_flags.global_history = false
 		update_flags.results = false
 		update_flags.radio_buttons_display_mode = false
 
@@ -119,7 +117,14 @@ function recexplo.gui.draw_title(gui_root)
 	}
 
 end
-function recexplo.gui.draw_product_selection(player_index, gui_root)
+function recexplo.gui.draw_history_and_container(player_index, gui_root)
+	local gui_root = gui_root.add{
+		type = "table",
+		name = "table_item_selection",
+		column_count = 2,
+		style = "recexplo_table"
+	}
+
 	if game.players[player_index].mod_settings["recexplo-enable-experimental-features"].value then
 		gui_root.add{
 			type = "label",
@@ -150,6 +155,9 @@ function recexplo.gui.draw_product_selection(player_index, gui_root)
 	}
 	recexplo.gui.draw_history(player_index, global[player_index].local_history, local_history)
 
+end
+function recexplo.gui.draw_product_selection(player_index, gui_root)
+	game.print("error funktion(draw_product_selection) no longer exist: " .. debug.traceback())
 end
 function recexplo.gui.draw_history(player_index, history, gui_root)
 	--game.print("draw_product_selection")
@@ -201,17 +209,17 @@ function recexplo.gui.draw_select_button(player_index, history, gui_root)
 
 	if signal and signal.type == "recipe" then
 		frame.add{
-			type = "sprite-button",
-			name = "recexplo_recipe_choose_elem_button",	
-			sprite = "recipe/" .. signal.name,
-			tooltip = game.recipe_prototypes[signal.name].localised_name,
+			type = "choose-elem-button",
+			name = "recexplo_recipe_choose_elem_button",
+			elem_type = "recipe",
+			recipe = signal.name,
 			style = "red_slot_button"
 		}
 
 	else
 		frame.add{
 			type = "choose-elem-button",
-			name = "recexplo_choose_elem_button",
+			name = "recexplo_signal_choose_elem_button",
 			elem_type = "signal",
 			signal = signal,
 			style = "slot_button"
@@ -248,9 +256,17 @@ function recexplo.gui.draw_history_item(history, gui_root, i)
 end
 
 function recexplo.gui.update_history(player_index)
-	local gui_root = game.players[player_index].gui.left.recexplo_flow.recexplo_gui_frame.recexplo_gui_table.table_item_selection
+	game.print("error funktion(update_history) no longer exist: " .. debug.traceback())
+end
+function recexplo.gui.update_local_history(player_index)
+	local gui_root = game.players[player_index].gui.left.recexplo_flow.recexplo_gui_frame.recexplo_gui_table.table_item_selection.local_history_table
 	gui_root.clear()
-	recexplo.gui.draw_product_selection(player_index, gui_root)
+	recexplo.gui.draw_history(player_index, global[player_index].local_history, gui_root)
+end
+function recexplo.gui.update_global_history(player_index)
+	local gui_root = game.players[player_index].gui.left.recexplo_flow.recexplo_gui_frame.recexplo_gui_table.table_item_selection.global_history_table
+	gui_root.clear()
+	recexplo.gui.draw_history(player_index, global[player_index].global_history, gui_root)
 end
 
 
@@ -395,7 +411,13 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 
 	if do_gui_update then
 		local update_flags = global[player_index].update_flags
-		update_flags.history = true
+
+		if history.name == "local" then
+			update_flags.local_history = true
+		elseif history.name == "global" then
+			update_flags.global_history = true
+		end
+
 		update_flags.results = true
 		update_flags.radio_buttons_display_mode = true
 
@@ -404,7 +426,7 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 				other_player_index = player.index
 
 				if player_index ~= other_player_index then
-					global[other_player_index].update_flags.history = true
+					global[other_player_index].update_flags.global_history = true
 
 					if global[other_player_index].global_history.pos == global[player_index].global_history.pos then
 						global[other_player_index].global_history.pos = global[other_player_index].global_history.pos +1
@@ -719,12 +741,12 @@ function recexplo.gui.draw_made_in (player_index, gui_root, recipe)
 	}
 	--game.print("recipe.category: " .. recipe.category)
 	local entity_list = recexplo.find_all_made_in_entity(player_index, recipe)
-
+	
 	for i = 0,entity_list.length do
-		if entity_list[i].name == "player" then
+		if entity_list[i].name == "character" then
 			made_in_table.add{
 				type = "sprite-button",
-				name = recexplo.prefix_made_in_player .. recipe.name,
+				name = recexplo.prefix_made_in_character .. recipe.name,
 				style = "slot_button",
 				sprite = "entity/" .. entity_list[i].name,
 				tooltip = entity_list[i].localised_name
