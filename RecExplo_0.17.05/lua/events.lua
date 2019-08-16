@@ -87,16 +87,13 @@ script.on_event(defines.events.on_gui_click, function(event)
 			local pos = tonumber(string.sub(event.element.name, string.len(recexplo.prefix_global_history_item) + 1))
 			local history = global[player_index].global_history
 
-			--[[if history.pos == -1 then
-				history.pos = pos
-				global[player_index].local_history.pos = -1
-			end]]
 			
 			if event.button == defines.mouse_button_type.left then
+				if history.pos == -1 then
+					global[player_index].local_history.pos = -1
+					global[other_player_index].update_flags.local_history = true
+				end
 				history.pos = pos
-				global[player_index].local_history.pos = -1
-
-				global[player_index].update_flags.results = true
 
 			elseif event.button == defines.mouse_button_type.right then
 				recexplo.history.delete_pos(history, pos)
@@ -118,21 +115,21 @@ script.on_event(defines.events.on_gui_click, function(event)
 			recexplo.history.explo_gui_unpack_data(player_index, history.list[history.pos])
 
 			global[player_index].update_flags.global_history = true
+			global[player_index].update_flags.results = true
+			global[player_index].update_flags.radio_buttons_display_mode = true
+
 			goto exit
 
 		elseif string.find(event.element.name, recexplo.prefix_local_history_item, 1) ~= nil then
 			local pos = tonumber(string.sub(event.element.name, string.len(recexplo.prefix_local_history_item) + 1))
 			local history = global[player_index].local_history
 
-			--[[if history.pos == -1 then
-				history.pos = pos
-				global[player_index].global_history.pos = -1
-			end]]
-
 			if event.button == defines.mouse_button_type.left then
+				if history.pos == -1 then
+					global[player_index].global_history.pos = -1
+					global[other_player_index].update_flags.global_history = true
+				end
 				history.pos = pos
-				global[player_index].global_history.pos = -1
-
 			elseif event.button == defines.mouse_button_type.right then
 				recexplo.history.delete_pos(history, pos)
 
@@ -383,7 +380,7 @@ script.on_event(defines.events.on_gui_elem_changed, function(event)
 				if event.element.name == "recexplo_recipe_choose_elem_button" then
 					global[player_index].selctet_product_signal.type = "recipe"
 					global[player_index].selctet_product_signal.name = event.element.elem_value					
-				elseif event.element.name == "recexplo_signal_choose_elem_button" then
+				elseif event.element.name == "recexplo_signal_choose_elem_button" or event.element.name == global[player_index].global_history.placeholder_name or event.element.name == global[player_index].local_history.placeholder_name then
 					global[player_index].selctet_product_signal = event.element.elem_value
 				end
 

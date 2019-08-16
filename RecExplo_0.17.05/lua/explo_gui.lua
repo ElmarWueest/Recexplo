@@ -46,9 +46,9 @@ function recexplo.gui.open(player_index)
 		}
 		recexplo.gui.create_results(player_index, result_gui_root)
 	end
-	if global[player_index].cal_gui.is_open then
+	--if global[player_index].cal_gui.is_open then
 		recexplo.cal_gui.open(player_index)
-	end
+	--end
 end
 function recexplo.gui.close(player_index)
 	global[player_index].gui.is_open = false
@@ -70,7 +70,9 @@ function recexplo.gui.update()
 				recexplo.gui.update_local_history(player_index)
 			end
 			if update_flags.global_history then
-				recexplo.gui.update_global_history(player_index)
+				if game.players[player_index].mod_settings["recexplo-enable-experimental-features"].value then
+					recexplo.gui.update_global_history(player_index)
+				end
 			end
 			if update_flags.results then
 				recexplo.gui.update_results(player_index)
