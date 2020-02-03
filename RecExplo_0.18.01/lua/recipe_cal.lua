@@ -381,7 +381,10 @@ function recexplo.cal_gui.calculat_recipes(cal_recipe, product_name, ingredient_
 				if product.amount then
 					product_amount = product.amount	
 				else
-					product_amount = ((product.amount_min + product.amount_max) / 2) * product.probability
+					product_amount = (product.amount_min + product.amount_max) / 2
+				end
+				if product.probability then
+					product_amount = product_amount * product.probability
 				end
 			end
 		end

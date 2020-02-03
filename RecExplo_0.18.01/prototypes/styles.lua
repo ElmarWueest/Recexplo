@@ -10,13 +10,13 @@ data:extend({
 		type = "font",
 		name = "recexplo_m",
 		from = "default",
-		size = 15
+		size = 14
 	},
 	{
 		type = "font",
 		name = "recexplo_l",
 		from = "default",
-		size = 18
+		size = 17
 	},
 	{
 		type = "font",
@@ -28,13 +28,13 @@ data:extend({
 		type = "font",
 		name = "recexplo_mb",
 		from = "default-semibold",
-		size = 15
+		size = 14
 	},
 	{
 		type = "font",
 		name = "recexplo_lb",
 		from = "default-semibold",
-		size = 18
+		size = 17
 	},
 
 	--sprite
@@ -123,6 +123,7 @@ data.raw["gui-style"].default["recexplo_object_naming_lst"] = {
 	type = "label_style",
 	font = "recexplo_s",
 	font_color = {r=1, g=1, b=1},
+	single_line = false
 }
 data.raw["gui-style"].default["recexplo_sub_title_lst"] = {
 	type = "label_style",
@@ -135,7 +136,7 @@ data.raw["gui-style"].default["recexplo_title_lst"] = {
 	font_color = {r=1, g=1, b=1},
 	single_line = false,
 	top_padding = 3,
-	maximal_width = 200
+	maximal_width = 108
 }
 data.raw["gui-style"].default["recexplo_label_stats"] = {
 	type = "label_style",

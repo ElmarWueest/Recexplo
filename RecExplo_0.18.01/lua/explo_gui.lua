@@ -46,9 +46,9 @@ function recexplo.gui.open(player_index)
 		}
 		recexplo.gui.create_results(player_index, result_gui_root)
 	end
-	--if global[player_index].cal_gui.is_open then
+	if global[player_index].cal_gui.is_open then
 		recexplo.cal_gui.open(player_index)
-	--end
+	end
 end
 function recexplo.gui.close(player_index)
 	global[player_index].gui.is_open = false
@@ -642,9 +642,13 @@ function recexplo.gui.draw_product(player_index, gui_root, product, i)
 	--calculate amount
 	local amount
 	if product.amount then
-		amount = product.amount	
+		amount = product.amount
 	else
-		amount = ((product.amount_min + product.amount_max) / 2) * product.probability
+		amount = ((product.amount_min + product.amount_max) / 2)  -- ==( (max-min)/2  +min )*probability
+	end
+
+	if product.probability then
+		amount = amount * product.probability
 	end
 	
 	recexplo.gui.draw_product_button(player_index, product_table, product, amount, "product")
