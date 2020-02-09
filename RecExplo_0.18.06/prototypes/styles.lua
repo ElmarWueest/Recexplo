@@ -1,5 +1,6 @@
---fonts
+
 data:extend({
+	--fonts
 	{
 		type = "font",
 		name = "recexplo_s",
@@ -34,7 +35,7 @@ data:extend({
 		type = "font",
 		name = "recexplo_lb",
 		from = "default-semibold",
-		size = 17
+		size = 22
 	},
 
 	--sprite
@@ -64,8 +65,25 @@ data:extend({
 		width = 64,
 		height = 64,
 		scale = 1,
+	},
+	{
+		type = "sprite",
+		name = "recipe-book",
+		filename = "__RecExplo__/graphics/recipe-book.png",
+		priority = "extra-high-no-scale",
+		width = 64,
+		height = 64,
+		scale = 1,
+	},
+	{
+		type = "sprite",
+		name = "recipe-calculator",
+		filename = "__RecExplo__/graphics/recipe-calculator.png",
+		priority = "extra-high-no-scale",
+		width = 64,
+		height = 64,
+		scale = 1,
 	}
-
 })
 
 

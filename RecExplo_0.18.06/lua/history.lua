@@ -134,7 +134,7 @@ function recexplo.history.explo_gui_pack_data(player_index)
 		data.signal.type = global[player_index].selctet_product_signal.type
 		data.signal.name = global[player_index].selctet_product_signal.name
 	end
-	data.display_mode = global[player_index].display_mode
+	data.search_mode = global[player_index].search_mode
 
 	return data
 end
@@ -147,10 +147,10 @@ function recexplo.history.explo_gui_unpack_data(player_index, data)
 		global[player_index].selctet_product_signal = nil
 	end
 	
-	if data and data.display_mode then
-		global[player_index].display_mode = data.display_mode
+	if data and data.search_mode then
+		global[player_index].search_mode = data.search_mode
 	else
-		global[player_index].display_mode = "recipe"
+		global[player_index].search_mode = "recipe"
 	end
 end
 
@@ -175,16 +175,16 @@ function recexplo.history.debug(history)
 		end
     	game.print("history stack: " .. text, color)
 	
-    	--display_mode
+    	--search_mode
 		local i = 1
 		local text = ""
 		::start2::
 		if history.list[i] then
-			text = text .. "/ " .. tostring(i).. " " .. history.list[i].display_mode
+			text = text .. "/ " .. tostring(i).. " " .. history.list[i].search_mode
 			i = i + 1
 			goto start2
 		end
-		game.print("display_mode stack: " .. text, color)
+		game.print("search_mode stack: " .. text, color)
 	else
 		game.print("history: nil", color)
 	end

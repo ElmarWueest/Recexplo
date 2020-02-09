@@ -7,6 +7,9 @@ script.on_event(defines.events.on_tick, function(event)
 		for i, player in pairs(game.connected_players) do
 			recexplo.create_global_table(player.index)
 		end
+
+		--debugg
+		--game.print(global[event.player_index].filter_mode)
 	end
 	if recexplo.had_opened_tech then
 		if recexplo.had_opened_tech > 1 then
@@ -116,7 +119,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 
 			global[player_index].update_flags.global_history = true
 			global[player_index].update_flags.results = true
-			global[player_index].update_flags.radio_buttons_display_mode = true
+			global[player_index].update_flags.radio_buttons_search_mode = true
 
 			goto exit
 
@@ -139,7 +142,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 			
 			global[player_index].update_flags.local_history = true
 			global[player_index].update_flags.results = true
-			global[player_index].update_flags.radio_buttons_display_mode = true
+			global[player_index].update_flags.radio_buttons_search_mode = true
 
 			goto exit
 
@@ -252,7 +255,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 				update_flags.global_history = true
 			end
 			global[player_index].update_flags.results = true
-			global[player_index].update_flags.radio_buttons_display_mode = true
+			global[player_index].update_flags.radio_buttons_search_mode = true
 
 			if history.name == "global" then
 				for _, player in pairs(game.players) do
@@ -264,7 +267,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 						if global[other_player_index].global_history.pos ~= -1 then
 							recexplo.history.explo_gui_unpack_data(player_index, nil)
 							global[other_player_index].update_flags.results = true
-							global[other_player_index].update_flags.radio_buttons_display_mode = true
+							global[other_player_index].update_flags.radio_buttons_search_mode = true
 						end
 					end
 				end
@@ -397,7 +400,7 @@ script.on_event(defines.events.on_gui_elem_changed, function(event)
 				end
 	
 				global[player_index].update_flags.results = true
-				--global[player_index].update_flags.radio_buttons_display_mode = true
+				--global[player_index].update_flags.radio_buttons_search_mode = true
 				if history.name == "global" then
 					for _, player in pairs(game.players) do
 						other_player_index = player.index
@@ -426,7 +429,7 @@ script.on_event(defines.events.on_gui_elem_changed, function(event)
 			end
 
 			global[player_index].update_flags.results = true
-			global[player_index].update_flags.radio_buttons_display_mode = true
+			global[player_index].update_flags.radio_buttons_search_mode = true
 			
 			if history.name == "global" then
 				for _, player in pairs(game.players) do
@@ -440,7 +443,7 @@ script.on_event(defines.events.on_gui_elem_changed, function(event)
 						end
 						if global[other_player_index].global_history.pos == global[player_index].global_history.pos +1 then
 							global[other_player_index].update_flags.results = true
-							global[other_player_index].update_flags.radio_buttons_display_mode = true
+							global[other_player_index].update_flags.radio_buttons_search_mode = true
 						end
 					end
 				end
@@ -461,15 +464,15 @@ end)
 script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 	local player_index = event.player_index
 	if global[player_index].gui.is_open then
-		if event.element.name == "radiobutton_dm_recipe" then
-			if global[player_index].display_mode == "where_used" then
-				global[player_index].display_mode = "recipe"
+		if event.element.name == "recexplo_radiobutton_dm_recipe" then
+			if global[player_index].search_mode == "where_used" then
+				global[player_index].search_mode = "recipe"
 			end
 			local history = recexplo.history.active_recipe_history(player_index)
 			recexplo.history.save_state(history, recexplo.history.explo_gui_pack_data(player_index))
 
 			global[player_index].update_flags.results = true
-			global[player_index].update_flags.radio_buttons_display_mode = true
+			global[player_index].update_flags.radio_buttons_search_mode = true
 
 			for _, player in pairs(game.players) do
 				other_player_index = player.index
@@ -477,21 +480,21 @@ script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 				if player_index ~= other_player_index and
 				global[other_player_index].global_history.pos == global[player_index].global_history.pos then
 					global[other_player_index].update_flags.results = true
-					global[other_player_index].update_flags.radio_buttons_display_mode = true
+					global[other_player_index].update_flags.radio_buttons_search_mode = true
 					
 				end
 			end
 
 	
-		elseif event.element.name == "radiobutton_dm_where_used" then
-			if global[player_index].display_mode == "recipe" then
-				global[player_index].display_mode = "where_used"
+		elseif event.element.name == "recexplo_radiobutton_dm_where_used" then
+			if global[player_index].search_mode == "recipe" then
+				global[player_index].search_mode = "where_used"
 			end
 			local history = recexplo.history.active_recipe_history(player_index)
 			recexplo.history.save_state(history, recexplo.history.explo_gui_pack_data(player_index))
 
 			global[player_index].update_flags.results = true
-			global[player_index].update_flags.radio_buttons_display_mode = true
+			global[player_index].update_flags.radio_buttons_search_mode = true
 
 			for _, player in pairs(game.players) do
 				other_player_index = player.index
@@ -499,7 +502,7 @@ script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 				if player_index ~= other_player_index and
 				global[other_player_index].global_history.pos == global[player_index].global_history.pos then
 					global[other_player_index].update_flags.results = true
-					global[other_player_index].update_flags.radio_buttons_display_mode = true
+					global[other_player_index].update_flags.radio_buttons_search_mode = true
 					
 				end
 			end
@@ -534,6 +537,13 @@ script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 			recexplo.cal_gui.draw_cal_recipe_made_in(cal_made_in_table, index, io_cal_recipe)
 
 			global[player_index].cal_gui_update_flags.stats = true
+		elseif event.element.name == "recexplo_filter_checkbox" then
+			if event.element.state then
+				global[player_index].filter_mode = "researched"
+			else
+				global[player_index].filter_mode = "all"
+			end
+			global[player_index].update_flags.results = true
 		end
 	end
 
@@ -619,7 +629,7 @@ script.on_configuration_changed(function(configuration_changed_data)
 		if global[player_index].gui.is_open then global[player_index].gui.is_open = false end	
 		
 		if global[player_index].selctet_product_signal then global[player_index].selctet_product_signal = nil end--{ type = "item", name = "piercing-rounds-magazine"} end --crude-oil
-		if global[player_index].display_mode then global[player_index].display_mode = "recipe" end --recipe, where_used, single_recipe
+		if global[player_index].search_mode then global[player_index].search_mode = "recipe" end --recipe, where_used, single_recipe
 		if global[player_index].pasting_enabled then global[player_index].pasting_enabled = true end
 		if global[player_index].pasting_recipe then global[player_index].pasting_recipe = nil end
 

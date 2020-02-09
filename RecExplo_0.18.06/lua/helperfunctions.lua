@@ -28,4 +28,17 @@ function round(num, numDecimalPlaces)
 	end
 end
 
---game.print(debug.traceback())
+
+function technology_state(technology)
+	--find style
+	if technology.researched then
+		return "researched"
+	else
+		for _, prerequisite in pairs(technology.prerequisites) do
+			if prerequisite and not prerequisite.researched then
+				return "unavailable"
+			end
+		end
+		return "available"
+	end
+end

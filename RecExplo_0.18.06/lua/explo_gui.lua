@@ -77,8 +77,8 @@ function recexplo.gui.update()
 			if update_flags.results then
 				recexplo.gui.update_results(player_index)
 			end
-			if update_flags.radio_buttons_display_mode then
-				recexplo.gui.update_radio_buttons_display_mode(player_index)
+			if update_flags.radio_buttons_search_mode then
+				recexplo.gui.update_radio_buttons_search_mode(player_index)
 			end
 			if cal_gui_update_flags.results then
 				recexplo.cal_gui.update(player_index)
@@ -91,7 +91,7 @@ function recexplo.gui.update()
 		update_flags.local_history = false
 		update_flags.global_history = false
 		update_flags.results = false
-		update_flags.radio_buttons_display_mode = false
+		update_flags.radio_buttons_search_mode = false
 
 		cal_gui_update_flags.results = false
 		cal_gui_update_flags.stats = false
@@ -112,10 +112,10 @@ function recexplo.gui.draw_title(gui_root)
 		style = "recexplo_gui_title"
 	}
 	flow_title.add{
-		type = "button",
+		type = "sprite-button",
 		name = "recexplo_open_cal_gui",
-		caption = {"recexplo-gui.open-recipe-cal"},
-		style = "recexplo_button_midium_font"
+		sprite = "recipe-calculator",
+		style = "recexplo_sprite_button"
 	}
 
 end
@@ -277,7 +277,7 @@ function recexplo.gui.draw_controlls(player_index, gui_root)
 	local controlls_table = gui_root.add{
 		type = "table",
 		name = "controlls_table",
-		column_count = 10
+		column_count = 5
 	}
 	recexplo.gui.draw_move_history_button(controlls_table)
 	controlls_table.add{
@@ -289,11 +289,19 @@ function recexplo.gui.draw_controlls(player_index, gui_root)
 
 	local radiobutton_table = controlls_table.add{
 		type = "table",
-		name = "display_mode_table",
+		name = "search_mode_table",
 		column_count = 2,
 		style = "recexplo_table"
 	}
-	recexplo.gui.draw_radio_buttons_display_mode(player_index, radiobutton_table)
+	recexplo.gui.draw_radio_buttons_search_mode(player_index, radiobutton_table)
+
+	local researched_table = controlls_table.add{
+		type = "table",
+		name = "show_researched_table",
+		column_count = 2,
+		style = "recexplo_table"
+	}
+	recexplo.gui.draw_show_researched(player_index, researched_table)
 end
 function recexplo.gui.draw_move_history_button(gui_root)
 	gui_root.add{
@@ -310,56 +318,70 @@ function recexplo.gui.draw_move_history_button(gui_root)
 	}
 end
 
-function recexplo.gui.draw_radio_buttons_display_mode(player_index, gui_root)
+function recexplo.gui.draw_radio_buttons_search_mode(player_index, gui_root)
 	gui_root.add{
 		type = "label",
-		name = "display_mode_label_recipe",
+		name = "search_mode_label_recipe",
 		caption = {"recexplo-gui.find-recipe"}
 	}
 	gui_root.add{
 		type = "radiobutton",
-		name = "radiobutton_dm_recipe",
+		name = "recexplo_radiobutton_dm_recipe",
 		state = true
 	}
 	gui_root.add{
 		type = "label",
-		name = "display_mode_label_where_used",
-		caption = {"recexplo-gui.find-where-it-is-used"}
+		name = "search_mode_label_where_used",
+		caption = {"recexplo-gui.used-for"}
 	}
 	gui_root.add{
 		type = "radiobutton",
-		name = "radiobutton_dm_where_used",
+		name = "recexplo_radiobutton_dm_where_used",
 		state = false
 	}
 	
-	recexplo.gui.update_radio_buttons_display_mode(player_index)
+	recexplo.gui.update_radio_buttons_search_mode(player_index)
 end
-function recexplo.gui.update_radio_buttons_display_mode(player_index)
+function recexplo.gui.update_radio_buttons_search_mode(player_index)
 	if global[player_index].gui.is_open then
-		local gui_root = game.players[player_index].gui.left.recexplo_flow.recexplo_gui_frame.recexplo_gui_table.controlls_table.display_mode_table
-		if global[player_index].display_mode == "recipe" then
-			gui_root["radiobutton_dm_recipe"].state = true
-			gui_root["radiobutton_dm_where_used"].state = false
-		elseif global[player_index].display_mode == "where_used" then
-			gui_root["radiobutton_dm_recipe"].state = false
-			gui_root["radiobutton_dm_where_used"].state = true
+		local gui_root = game.players[player_index].gui.left.recexplo_flow.recexplo_gui_frame.recexplo_gui_table.controlls_table.search_mode_table
+		if global[player_index].search_mode == "recipe" then
+			gui_root["recexplo_radiobutton_dm_recipe"].state = true
+			gui_root["recexplo_radiobutton_dm_where_used"].state = false
+		elseif global[player_index].search_mode == "where_used" then
+			gui_root["recexplo_radiobutton_dm_recipe"].state = false
+			gui_root["recexplo_radiobutton_dm_where_used"].state = true
 		else
-			gui_root["radiobutton_dm_recipe"].state = false
-			gui_root["radiobutton_dm_where_used"].state = false
+			gui_root["recexplo_radiobutton_dm_recipe"].state = false
+			gui_root["recexplo_radiobutton_dm_where_used"].state = false
 		end
+	end
+end
+function recexplo.gui.draw_show_researched(player_index, gui_root)
+	gui_root.add{
+		type = "label",
+		name = "filter_mod_label",
+		caption = {"recexplo-gui.show-researched"}
+	}
+	local checkbox = gui_root.add{
+		type = "checkbox",
+		name = "recexplo_filter_checkbox",
+		state = false
+	}
+	if global[player_index].filter_mode == "researched" then
+		checkbox.state = true
 	end
 end
 
 
 
-
 --create/update results/product
-function recexplo.gui.update_to_selectet_product(player_index, name, display_mode)
-	--game.print("update_to_selectet_product: " .. name .. " / " .. display_mode,{b=1})
+function recexplo.gui.update_to_selectet_product(player_index, name, search_mode)
+	--game.print("update_to_selectet_product: " .. name .. " / " .. search_mode,{b=1})
 	local signal = global[player_index].selctet_product_signal
 	local history = recexplo.history.active_recipe_history(player_index)
 	local signal_type
-	if display_mode == "single_recipe" then
+	if search_mode == "single_recipe" then
 		signal_type = "recipe"
 	else
 		if game.item_prototypes[name] then
@@ -397,17 +419,17 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 		do_gui_update = true
 		signal.name = name
 		signal.type = signal_type
-		global[player_index].display_mode = display_mode
+		global[player_index].search_mode = search_mode
 
 		--game.print("signal.name: ".. signal.name,{g=0.3,b=1})
 		--game.print("signal.type: ".. signal.type,{g=0.3,b=1})
-		--game.print("global[player_index].display_mode: ".. global[player_index].display_mode,{g=0.3,b=1})
+		--game.print("global[player_index].search_mode: ".. global[player_index].search_mode,{g=0.3,b=1})
 
 		recexplo.history.add_state(history, player_index, recexplo.history.explo_gui_pack_data(player_index))
 
-	elseif display_mode ~= global[player_index].display_mode then
+	elseif search_mode ~= global[player_index].search_mode then
 		do_gui_update = true
-		global[player_index].display_mode = display_mode
+		global[player_index].search_mode = search_mode
 		recexplo.history.save_state(history, recexplo.history.explo_gui_pack_data(player_index))
 	end
 
@@ -421,7 +443,7 @@ function recexplo.gui.update_to_selectet_product(player_index, name, display_mod
 		end
 
 		update_flags.results = true
-		update_flags.radio_buttons_display_mode = true
+		update_flags.radio_buttons_search_mode = true
 
 		if history.name == "global" then
 			for _, player in pairs(game.players) do
@@ -471,19 +493,19 @@ function recexplo.gui.create_all_recipes_container(player_index, gui_root)
 		style = "recexplo_recipe_table"
 	}
 	--search for recipes(recipes)
-	if global[player_index].display_mode == "recipe" then
+	if global[player_index].search_mode == "recipe" then
 		recexplo.gui.create_all_recipes(player_index, recipe_gui_root)
-	elseif global[player_index].display_mode == "where_used" then
+	elseif global[player_index].search_mode == "where_used" then
 		recexplo.gui.create_all_where_used(player_index, recipe_gui_root)		
-	elseif global[player_index].display_mode == "single_recipe" then
+	elseif global[player_index].search_mode == "single_recipe" then
 		local recipe_name = global[player_index].selctet_product_signal.name
 		local recipe = game.recipe_prototypes[recipe_name]
 		recexplo.gui.draw_recipe(player_index, recipe_gui_root, recipe)
 	else
-		if global[player_index].display_mode then
-			game.print("create_all_recipes_container display_mode: " .. global[player_index].display_mode)
+		if global[player_index].search_mode then
+			game.print("create_all_recipes_container search_mode: " .. global[player_index].search_mode)
 		else
-			game.print("create_all_recipes_container display_mode: nil")
+			game.print("create_all_recipes_container search_mode: nil")
 		end
 	end
 
@@ -498,14 +520,16 @@ function recexplo.gui.create_all_recipes(player_index, gui_root)
 		if recipe.valid and (display_hidden or (not(recipe.hidden) and not(display_hidden))) then
 			for _, product in pairs(recipe.products) do
 				if product.name == global[player_index].selctet_product_signal.name then
-					if display_hidden or (recexplo.gui.is_researchable(player_index, recipe) and not(display_hidden)) then					
-						recexplo.gui.draw_recipe(player_index, gui_root, recipe)
-						i = i + 1
-
-						if i > max_recipes_count then
-							game.players[player_index].print({"recexplo-consol.only-the-first-recipes-are-displayed", max_recipes_count})
-							goto done
-						end
+					if display_hidden or (recexplo.gui.is_researchable(player_index, recipe) and not(display_hidden)) then
+						if recexplo.gui.is_passing_filter(player_index, recipe) then
+							recexplo.gui.draw_recipe(player_index, gui_root, recipe)
+							i = i + 1
+	
+							if i > max_recipes_count then
+								game.players[player_index].print({"recexplo-consol.only-the-first-recipes-are-displayed", max_recipes_count})
+								goto done
+							end
+						end					
 					end
 				end
 			end
@@ -525,12 +549,14 @@ function recexplo.gui.create_all_where_used(player_index, gui_root)
 				for _,  ingredient in pairs(recipe.ingredients) do
 					if  ingredient.name == global[player_index].selctet_product_signal.name then
 						if display_hidden or (recexplo.gui.is_researchable(player_index, recipe) and not(display_hidden)) then
-							recexplo.gui.draw_recipe(player_index, gui_root, recipe)
-							i = i + 1
+							if recexplo.gui.is_passing_filter(player_index, recipe) then
+								recexplo.gui.draw_recipe(player_index, gui_root, recipe)
+								i = i + 1
 
-							if i > max_recipes_count then
-								game.players[player_index].print({"recexplo-consol.only-the-first-recipes-are-displayed", max_recipes_count})
-								goto done
+								if i > max_recipes_count then
+									game.players[player_index].print({"recexplo-consol.only-the-first-recipes-are-displayed", max_recipes_count})
+									goto done
+								end
 							end
 						end
 					end
@@ -557,7 +583,36 @@ function recexplo.gui.is_researchable(player_index, recipe)
 		return true
 	end
 end
-
+function recexplo.gui.is_passing_filter(player_index, recipe)
+	--game.print("is_passing_filter")
+	if not global[player_index].filter_mode then
+		--game.print("filter mode is not set")
+		return true
+	end
+	if global[player_index].filter_mode == "all" then
+		return true
+	elseif global[player_index].filter_mode == "researched" then
+		return recexplo.gui.is_recipe_unlocked(player_index, recipe)
+	end
+end
+function recexplo.gui.is_recipe_unlocked(player_index, recipe)
+	if recipe.prototype.enabled then
+		return true
+	end
+	for _, technology in pairs(game.players[player_index].force.technologies) do
+		if technology.enabled then
+			--game.print("gefundene technologien: "..technology.name)
+			for _,modifier in pairs(technology.effects) do
+				if modifier.type == "unlock-recipe" and modifier.recipe == recipe.name then
+					if technology.researched then
+						return true
+					end
+				end
+			end
+		end
+	end
+	return false
+end
 
 --draw recipe
 function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
@@ -835,7 +890,7 @@ function recexplo.gui.debug(player_index)
 	local signal = global[player_index].selctet_product_signal
 	recexplo.gui.debug_signal(signal, color)
 
-	game.print("display_mode: " .. global[player_index].display_mode, color)
+	game.print("search_mode: " .. global[player_index].search_mode, color)
 end
 function recexplo.gui.debug_signal(signal, color)
 	if color == nil then

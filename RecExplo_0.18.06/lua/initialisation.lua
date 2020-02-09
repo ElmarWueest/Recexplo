@@ -45,7 +45,6 @@ script.on_event(defines.events.on_player_respawned, function(event)
 end)
 
 function recexplo.create_global_table(player_index)
-	
 
 	if not global then recexplo = {} end
 	recexplo.had_opened_tech = 0
@@ -59,9 +58,9 @@ function recexplo.create_global_table(player_index)
 
 	if not global[player_index].gui.is_open then global[player_index].gui.is_open = false end	
 	--if not global[player_index].selctet_product_signal then global[player_index].selctet_product_signal = nil end--{ type = "item", name = "piercing-rounds-magazine"} end --crude-oil
-	if not global[player_index].display_mode then global[player_index].display_mode = "recipe" end --recipe, where_used, single_recipe
+	if not global[player_index].search_mode then global[player_index].search_mode = "recipe" end --recipe, where_used, single_recipe
+	if not global[player_index].filter_mode then global[player_index].filter_mode = "researched" end --researched, all
 	if not global[player_index].pasting_enabled then global[player_index].pasting_enabled = true end
-	--if not global[player_index].pasting_recipe then global[player_index].pasting_recipe = nil end
 	
 
 	--update flags
@@ -69,7 +68,7 @@ function recexplo.create_global_table(player_index)
 	if not global[player_index].update_flags.local_history then global[player_index].update_flags.local_history = false end
 	if not global[player_index].update_flags.global_history then global[player_index].update_flags.global_history = false end
 	if not global[player_index].update_flags.results then global[player_index].update_flags.results = false end
-	if not global[player_index].update_flags.radio_buttons_display_mode then global[player_index].update_flags.radio_buttons_display_mode = false end
+	if not global[player_index].update_flags.radio_buttons_search_mode then global[player_index].update_flags.radio_buttons_search_mode = false end
 	
 	if not global[player_index].cal_gui_update_flags then global[player_index].cal_gui_update_flags = {} end
 	if not global[player_index].cal_gui_update_flags.results then global[player_index].cal_gui_update_flags.results = false end
@@ -79,6 +78,7 @@ function recexplo.create_global_table(player_index)
 	if not global[player_index].global_history then global[player_index].global_history = {} end	
 	if not global[player_index].global_history.name then global[player_index].global_history.name = "global" end
 	if not global[player_index].global_history.list then global[player_index].global_history.list = recexplo.history.global_history_list end	
+	if not global[player_index].global_history.list.length then global[player_index].global_history.list.length = 0 end	
 	if not global[player_index].global_history.pos then global[player_index].global_history.pos = -1 end
 	if not global[player_index].global_history.prefix_history_itme then global[player_index].global_history.prefix_history_itme = recexplo.prefix_global_history_item end
 	if not global[player_index].global_history.placeholder_name then global[player_index].global_history.placeholder_name = "recexplo_global_history_placehodler" end
@@ -118,7 +118,7 @@ function recexplo.version_update(player_index)
 			gui_root.recexplo_gui_frame.destroy()
 		end
 	end
-	global.version = "0.17.2"
+	global.version = "0.18.2"
 end
 
 function recexplo.top_button(player_index)
@@ -132,9 +132,10 @@ function recexplo.top_button(player_index)
 	else
 		if enable_top_button == true then
 			button_gui_root.add{
-				type = "button",
+				type = "sprite-button",
 				name = "b_recexplo",
-				caption = {"recexplo-gui.recipe-explorer"}
+				sprite = "recipe-book",
+				style = "recexplo_sprite_button"
 			}
 		end
 	end
