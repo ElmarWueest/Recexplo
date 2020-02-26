@@ -51,11 +51,12 @@ data:extend({
 	{
 		type = "sprite",
 		name = "remove-icon",
-		filename = "__core__/graphics/remove-icon.png",
+		filename = "__core__/graphics/icons/mip/trash.png",
 		priority = "extra-high-no-scale",
-		width = 64,
-		height = 64,
-		scale = 1,
+		size = 32,
+		flags = {"gui-icon"},
+		mipmap_count = 2,
+		scale = 0.5
 	},
 	{
 		type = "sprite",
@@ -122,9 +123,9 @@ data.raw["gui-style"].default["recexplo_frame"] ={
 data.raw["gui-style"].default["recexplo_recipe_frame"] ={
 	type = "frame_style",
 	parent = "frame",
-	horizontally_stretchable = "on",
 	vertically_stretchable = "on",
 
+	horizontally_squashable = "on",
 	padding = 2,
 	--width = 208
 }

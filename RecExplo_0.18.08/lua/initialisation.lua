@@ -46,18 +46,14 @@ end)
 
 function recexplo.create_global_table(player_index)
 
-	if not global then recexplo = {} end
 	recexplo.had_opened_tech = 0
 	if not global[player_index] then global[player_index] = {} end
 	if not global[player_index].gui then global[player_index].gui = {} end
 
-	--update versons
-	recexplo.version_update(player_index)
 	--top button
 	recexplo.top_button(player_index)
 
 	if not global[player_index].gui.is_open then global[player_index].gui.is_open = false end	
-	--if not global[player_index].selctet_product_signal then global[player_index].selctet_product_signal = nil end--{ type = "item", name = "piercing-rounds-magazine"} end --crude-oil
 	if not global[player_index].search_mode then global[player_index].search_mode = "recipe" end --recipe, where_used, single_recipe
 	if not global[player_index].filter_mode then global[player_index].filter_mode = "researched" end --researched, all
 	if not global[player_index].pasting_enabled then global[player_index].pasting_enabled = true end
@@ -111,14 +107,26 @@ function recexplo.create_global_table(player_index)
 	end
 end
 
-function recexplo.version_update(player_index)
-	if global.verison == nil then
-		local gui_root = game.players[player_index].gui.left
-		if gui_root.recexplo_gui_frame then
-			gui_root.recexplo_gui_frame.destroy()
+function recexplo.reset()
+	for _, player in pairs(game.players) do
+		local player_index = player.index
+		recexplo.reset_player(player_index)
+	end
+end
+function recexplo.reset_player(player_index)
+	global[player_index] = {}
+	recexplo.create_global_table(player_index)
+	recexplo.destroy_frame(player_index)
+
+end
+
+
+function recexplo.destroy_frame(player_index)
+	if game.players[player_index].gui.left.recexplo_flow then
+		if game.players[player_index].gui.left.recexplo_flow.recexplo_gui_frame then
+			game.players[player_index].gui.left.recexplo_flow.destroy()
 		end
 	end
-	global.version = "0.18.2"
 end
 
 function recexplo.top_button(player_index)

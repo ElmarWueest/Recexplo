@@ -5,7 +5,7 @@ function recexplo.find_all_made_in_entity(player_index, recipe)
 	local show_hidden = game.players[player_index].mod_settings["recexplo-show-hidden"].value
 	for _, entity in pairs(game.entity_prototypes) do
 		if entity.crafting_categories ~= nil and(not(entity.flags["hidden"])or(show_hidden))then
-			for entity_crafting_categories, v in next, entity.crafting_categories do
+			for entity_crafting_categories, v in next, entity.crafting_categories, nil do
 				--game.print("entity_crafting_categories: " .. entity_crafting_categories)
 				if entity_crafting_categories == recipe.category then
 					entity_list[i] = entity
@@ -15,6 +15,7 @@ function recexplo.find_all_made_in_entity(player_index, recipe)
 		end
 	end
 	entity_list.length = i - 1
+	--debug_print_made_in(entity_list)
 	return entity_list
 end
 

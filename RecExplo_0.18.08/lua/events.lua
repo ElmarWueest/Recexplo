@@ -4,9 +4,9 @@ require "lua/history"
 
 script.on_event(defines.events.on_tick, function(event)
 	if game.tick % 31 == 0 then
-		for i, player in pairs(game.connected_players) do
-			recexplo.create_global_table(player.index)
-		end
+		--[[for i, player in pairs(game.connected_players) do
+			recexplo.create_global_table(event.player_index)
+		end]]
 
 		--debugg
 		--game.print(global[event.player_index].filter_mode)
@@ -24,6 +24,8 @@ script.on_event(defines.events.on_player_joined_game, function(event)
 end)
 
 script.on_event(defines.events.on_gui_click, function(event)
+	recexplo.create_global_table(event.player_index)
+
 	--gui button
 	local player_index = event.player_index
 	local player = game.players[player_index]
@@ -328,6 +330,8 @@ script.on_event(defines.events.on_gui_click, function(event)
 	recexplo.gui.update()
 end)
 script.on_event(defines.events.on_gui_elem_changed, function(event)
+	recexplo.create_global_table(event.player_index)
+
 	local was_chaned = false
 	local history
 	local player_index = event.player_index
@@ -462,6 +466,8 @@ script.on_event(defines.events.on_gui_elem_changed, function(event)
 
 end)
 script.on_event(defines.events.on_gui_checked_state_changed, function(event)
+	recexplo.create_global_table(event.player_index)
+
 	local player_index = event.player_index
 	if global[player_index].gui.is_open then
 		if event.element.name == "recexplo_radiobutton_dm_recipe" then
@@ -550,6 +556,8 @@ script.on_event(defines.events.on_gui_checked_state_changed, function(event)
 	recexplo.gui.update()
 end)
 script.on_event(defines.events.on_gui_text_changed, function(event)
+	recexplo.create_global_table(event.player_index)
+
 	local player_index = event.player_index
 	if string.find(event.element.name, recexplo.prefix_cal_factories_amount, 1) then
 		local cal_recipe_index = string.sub(event.element.name, string.len(recexplo.prefix_cal_factories_amount) + 1)
@@ -566,6 +574,8 @@ end)
 
 
 script.on_event(defines.events.on_player_selected_area,function(event)
+	recexplo.create_global_table(event.player_index)
+
 	--game.print("on_player_selected_area was fired")
 	if event.item == "recexplo-pasting-tool" then
 		--game.print("recexplo-pasting-tool was used")
@@ -589,8 +599,9 @@ script.on_event(defines.events.on_player_selected_area,function(event)
 		end 
 	end
 end)
-
 script.on_event(defines.events.on_player_main_inventory_changed, function(event)
+	recexplo.create_global_table(event.player_index)
+
 	--local inventory = game.players[event.player_index].get_inventory(defines.inventory.player_main)
 	
 	local player = game.players[event.player_index]
@@ -604,6 +615,7 @@ script.on_event(defines.events.on_player_main_inventory_changed, function(event)
 end)
 
 script.on_event("recexplo-open-gui", function(event)
+	recexplo.create_global_table(event.player_index)
 	if global[event.player_index].gui.is_open then
 		recexplo.gui.close(event.player_index)		
 	else
@@ -613,40 +625,5 @@ end)
 
 
 script.on_configuration_changed(function(configuration_changed_data)
-	--game.print("on_configuration_changed")
-	
-	for player_index, value in ipairs(global) do
-		--delete open windows
-		local gui_root = game.players[player_index].gui.left
-		if gui_root.recexplo_gui_frame then
-			gui_root.recexplo_gui_frame.destroy()
-		end
-		
-		--delete history
-		if global[player_index].cal_gui then global[player_index].cal_gui = {} end		
-		if global[player_index].cal_gui.is_open then global[player_index].cal_gui.is_open = false end
-		if global[player_index].cal_gui.is_recording then global[player_index].cal_gui.is_recording = false end
-		if global[player_index].gui.is_open then global[player_index].gui.is_open = false end	
-		
-		if global[player_index].selctet_product_signal then global[player_index].selctet_product_signal = nil end--{ type = "item", name = "piercing-rounds-magazine"} end --crude-oil
-		if global[player_index].search_mode then global[player_index].search_mode = "recipe" end --recipe, where_used, single_recipe
-		if global[player_index].pasting_enabled then global[player_index].pasting_enabled = true end
-		if global[player_index].pasting_recipe then global[player_index].pasting_recipe = nil end
-
-		global[player_index].global_history = {} 	
-		global[player_index].global_history.length = 0 	
-		global[player_index].global_history.pos = -1 --(-1)= not selected
-		global[player_index].global_history.prefix_history_itme = recexplo.prefix_global_history_item 
-		global[player_index].global_history.placeholder_name = "recexplo_global_history_placehodler" 
-	
-		global[player_index].local_history = {} 	
-		global[player_index].local_history.length = 0 	
-		global[player_index].local_history.pos = 0 
-		global[player_index].local_history.prefix_history_itme = recexplo.prefix_local_history_item 
-		global[player_index].local_history.placeholder_name = "recexplo_local_history_placehodler" 
-
-		if global[player_index].selctet_product_signal then
-			global[player_index].selctet_product_signal = nil
-		end
-	end
+	recexplo.reset()
 end)

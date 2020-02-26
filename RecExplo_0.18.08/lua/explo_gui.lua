@@ -803,7 +803,7 @@ function recexplo.gui.draw_made_in (player_index, gui_root, recipe)
 	--game.print("recipe.category: " .. recipe.category)
 	local entity_list = recexplo.find_all_made_in_entity(player_index, recipe)
 	
-	for i = 0,entity_list.length do
+	for i = 0, entity_list.length do
 		if entity_list[i].name == "character" then
 			made_in_table.add{
 				type = "sprite-button",

@@ -285,10 +285,12 @@ function recexplo.cal_gui.add_only_product_name(player_index, product_name, inse
 end
 function recexplo.cal_gui.get_production_facilities(player_index, recipe)
 	local made_in_list = recexplo.find_all_made_in_entity(player_index, recipe)
+	--debug_print_made_in(made_in_list)
+	
 	made_in_list.selected_entity_index = 0
 
 	local entity = made_in_list[made_in_list.selected_entity_index]
-	if entity.name == "player"  or entity.crafting_speed == nil then
+	if entity.name == "character"  or entity.crafting_speed == nil then
 		made_in_list.crafting_speed = 1
 	else
 		made_in_list.crafting_speed = entity.crafting_speed
@@ -625,10 +627,13 @@ end
 function recexplo.cal_gui.draw_cal_recipe_made_in(gui_root, cal_recipe_index, cal_recipe)
 
 	local entity_list = cal_recipe.made_in
-	for i = 0, entity_list.length - 1 do
+	--debug_print_made_in(entity_list)
+	--for i = 0, entity_list.length - 1 do
+	--game.print("entity_list.lengt: " .. entity_list.length )
+	for i = 0, entity_list.length do
 		local entity = entity_list[i]
-		local container
 		if i == entity_list.selected_entity_index then
+			--game.print("i: " .. i)
 			gui_root.add{
 				type = "frame",
 				name = "selection",
@@ -641,6 +646,7 @@ function recexplo.cal_gui.draw_cal_recipe_made_in(gui_root, cal_recipe_index, ca
 				tooltip = entity.localised_name
 			}
 		else
+			--game.print("i: " .. i)
 			gui_root.add{
 				type = "sprite-button",
 				name = recexplo.prefix_cal_made_in .. cal_recipe_index .. "/" .. i,
@@ -895,10 +901,10 @@ function recexplo.cal_gui.update_io_facilities(made_in_list, product_name)
 			end
 		end
 	end
-	made_in_list.length = i
+	made_in_list.length = i - 1
 	
-	if made_in_list.selected_entity_index >= made_in_list.length then
-		made_in_list.selected_entity_index = made_in_list.length - 1 
+	if made_in_list.selected_entity_index > made_in_list.length then
+		made_in_list.selected_entity_index = made_in_list.length 
 	end
 
 	recexplo.cal_gui.calcualte_io_crafting_speed(made_in_list)
@@ -907,6 +913,7 @@ function recexplo.cal_gui.update_io_facilities(made_in_list, product_name)
 end
 function recexplo.cal_gui.calcualte_io_crafting_speed(made_in_list)
 	--calcualte io facilities
+	--game.print("selected_entity_index: " .. made_in_list.selected_entity_index)
 	if made_in_list.length > 0 then
 		if made_in_list.selected_entity_index == -1 then
 			made_in_list.crafting_speed = made_in_list.selected_manual_rate
@@ -1038,4 +1045,35 @@ function recexplo.cal_gui.draw_manual_io(player_index, gui_root, io_cal_recipe, 
 		name = "/s",
 		caption = "/s"
 	}
+end
+
+
+function debug_print_made_in(entity_list)
+	local color = {r=math.random(0,255);g=math.random(0,255);b=math.random(0,255)}
+
+	game.print("length: " .. entity_list.length, color)
+	local i = 0
+	local last_was_nil = false
+	while true do
+		local this_is_nil
+		if entity_list[i] then
+			this_is_nil = false
+		else
+			this_is_nil = true
+		end
+
+		if last_was_nil and this_is_nil then
+			return
+		else
+			last_was_nil = this_is_nil
+		end
+
+		if this_is_nil then
+			game.print("i: " .. i .." /nil", color)
+		else
+			game.print("i: " .. i .. " /name: " .. entity_list[i].name, color)
+		end
+
+		i = i+1
+	end
 end
