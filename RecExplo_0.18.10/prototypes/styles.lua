@@ -255,7 +255,7 @@ data.raw["gui-style"].default["recexplo_unavailable_technology_slot"] =
 data.raw["gui-style"].default["recexplo_researched_technology_slot"] = 
 {
   type = "button_style",
-  parent = "green_slot_button",
+  parent = "green_slot",
   height = 68,
   width = 68,
 }
