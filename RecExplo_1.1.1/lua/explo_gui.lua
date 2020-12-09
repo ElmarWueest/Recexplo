@@ -490,7 +490,7 @@ function recexplo.gui.create_all_recipes_container(player_index, gui_root)
 		name = "table_recipes",
 		direction = "vertical",
 		column_count = recipes_display_columns,
-		style = "recexplo_recipe_table"
+		style = "recexplo_table"
 	}
 	--search for recipes(recipes)
 	if global[player_index].search_mode == "recipe" then
@@ -628,7 +628,8 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 	}.add{
 		type = "table",
 		name = "recipe_table_".. recipe.name,
-		column_count = 1
+		column_count = 1,
+		style = "recexplo_table"
 	}
 	local table = frame.add{
 		type = "table",
@@ -662,9 +663,15 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 		style = "recexplo_sub_title_lst",
 		caption = {"recexplo-gui.product"}
 	}
+	local products_table = frame.add{
+		type = "table",
+		name = "recipe_products_table",
+		style = "recexplo_table",
+		column_count = 5
+	}
 	local i = 0
 	for _, product in pairs(recipe.products) do
-		recexplo.gui.draw_product(player_index, frame, product, i)
+		recexplo.gui.draw_product(player_index, products_table, product, i)
 		i = i + 1
 	end
 	
@@ -675,8 +682,14 @@ function recexplo.gui.draw_recipe(player_index, gui_root, recipe)
 		style = "recexplo_sub_title_lst",
 		caption = {"recexplo-gui.ingredients"}
 	}
+	local ingredients_table = frame.add{
+		type = "table",
+		name = "recipe_ingredients_table",
+		style = "recexplo_table",
+		column_count = 5
+	}
 	for _, ingredient in pairs(recipe.ingredients) do
-		recexplo.gui.draw_ingredient(player_index, frame, ingredient, i)
+		recexplo.gui.draw_ingredient(player_index, ingredients_table, ingredient, i)
 		i = i + 1
 	end
 	
@@ -690,7 +703,7 @@ function recexplo.gui.draw_product(player_index, gui_root, product, i)
 	local product_table = gui_root.add{
 		type = "table",
 		name = "product_table_" .. tostring(i),
-		column_count = 2,
+		column_count = 5,
 		style = "table"
 	}
 	
@@ -712,7 +725,7 @@ function recexplo.gui.draw_ingredient(player_index, gui_root, ingredient, i)
 	local ingredient_table = gui_root.add{
 		type = "table",
 		name = "ingredient_table_" .. tostring(i),
-		column_count = 2,
+		column_count = 5,
 		style = "table"
 	}
 
@@ -725,12 +738,14 @@ function recexplo.gui.draw_product_button(player_index, gui_root, product, amoun
 	local sprite_button = {
 		type = "sprite-button",
 		style = "slot_button",
-		tooltip = product.localised_name
+		number = amount
 	}
 
 	if game.item_prototypes[product.name] then
+		sprite_button.tooltip = {"", tostring(amount), " x ", game.item_prototypes[product.name].localised_name}
 		sprite_button.sprite = "item/" .. product.name
 	elseif game.fluid_prototypes[product.name] then
+		sprite_button.tooltip = {"", tostring(amount), " x ", game.fluid_prototypes[product.name].localised_name}
 		sprite_button.sprite = "fluid/" .. product.name
 	end
 
@@ -741,50 +756,23 @@ function recexplo.gui.draw_product_button(player_index, gui_root, product, amoun
 	end
 	gui_root.add(sprite_button)
 	
-
-
-	local label_amount = {
-		type = "label",
-		name = "label_amount_" .. product.name,
-		style = "recexplo_object_naming_lst",
-	}
-	
-	if product.type == "item" then
-		label_amount.caption = {"", tostring(amount), " x ", game.item_prototypes[product.name].localised_name}
-	elseif product.type == "fluid" then
-		label_amount.caption = {"", tostring(amount), " x ", game.fluid_prototypes[product.name].localised_name}
-	end
-	gui_root.add(label_amount)
-
 end
 function recexplo.gui.draw_recipe_button(gui_root, recipe)
 	local recipe_button = gui_root.add{
-		type = "sprite-button",
+		type = "sprite",
 		name = recexplo.prefix_recipe .. recipe.name,
 		sprite = "recipe/".. recipe.name,
-		tooltip = recipe.localised_name,
-		style = "recexplo_sprite_button"
+		tooltip = recipe.localised_name
 	}
 end
 function recexplo.gui.draw_recipe_energy(gui_root, recipe_energy)
-	local table = gui_root.add{
-		type = "table",
-		name = "recexplo_table_recipe_energy",
-		column_count = 2,
-		style = "table"
-	}
-	table.add{
+	gui_root.add{
 		type = "sprite-button",
 		name = "recexplo_button_recipe_energy",
 		style = "slot_button",
 		sprite = "clock",
+		number = recipe_energy,
 		tooltip = {"recexplo-gui.used-time"}
-	}
-	table.add{
-		type = "label",
-		name = "recexplo_label_recipe_energy",
-		style = "recexplo_object_naming_lst",
-		caption = {"",recipe_energy}
 	}
 end
 function recexplo.gui.draw_made_in (player_index, gui_root, recipe)
@@ -797,7 +785,7 @@ function recexplo.gui.draw_made_in (player_index, gui_root, recipe)
 	local made_in_table = gui_root.add{
 		type = "table",
 		name = "table_made_in_" .. recipe.name,
-		style = "table",
+		style = "recexplo_table",
 		column_count = 5
 	}
 	--game.print("recipe.category: " .. recipe.category)

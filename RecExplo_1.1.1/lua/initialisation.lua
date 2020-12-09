@@ -9,7 +9,7 @@ if not recexplo.prefix_item_button_product then recexplo.prefix_item_button_prod
 if not recexplo.prefix_item_button_ingredient then recexplo.prefix_item_button_ingredient = "recexplo_item_button_ingredient_" end
 if not recexplo.prefix_made_in then recexplo.prefix_made_in = "recexplo_made_in_" end
 if not recexplo.prefix_made_in_character then recexplo.prefix_made_in_character = "recexplo_character_made_in_" end
-if not recexplo.prefix_recipe then recexplo.prefix_recipe = "recexplo_recipi_" end
+if not recexplo.prefix_recipe then recexplo.prefix_recipe = "recexplo_recipe_" end
 if not recexplo.prefix_technology then recexplo.prefix_technology = "recexplo_technology_" end
 if not recexplo.prefix_remove_cal then recexplo.prefix_remove_cal = "recexplo_remove_cal_" end
 if not recexplo.prefix_cal_made_in then recexplo.prefix_cal_made_in = "recexplo_cal_made_in_index_" end

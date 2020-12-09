@@ -148,7 +148,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 
 			goto exit
 
-		elseif string.find(event.element.name, recexplo.prefix_recipe, 1) ~= nil then
+		--[[elseif string.find(event.element.name, recexplo.prefix_recipe, 1) ~= nil then
 			local recipe = string.sub(event.element.name, string.len(recexplo.prefix_recipe) + 1)
 			
 			--game.print("recipe name: "..tostring(recipe))
@@ -169,7 +169,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 				end 
 			end
 			player.print({"recexplo-consol.you-have-not-unlockt-the-recipe"}) 
-			goto exit
+			goto exit]]
 			
 		elseif string.find(event.element.name, recexplo.prefix_technology, 1) ~= nil then
 			local tech_name = string.sub(event.element.name, string.len(recexplo.prefix_technology) + 1)

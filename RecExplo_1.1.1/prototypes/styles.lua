@@ -90,7 +90,8 @@ data:extend({
 
 --flow_style
 data.raw["gui-style"].default["recexplo_flow"] ={
-	type = "horizontal_flow_style"
+	type = "horizontal_flow_style",
+	spacing = 0
 }
 
 
@@ -126,7 +127,7 @@ data.raw["gui-style"].default["recexplo_recipe_frame"] ={
 	vertically_stretchable = "on",
 
 	horizontally_squashable = "on",
-	padding = 2,
+	padding = 0,
 	--width = 208
 }
 
@@ -154,7 +155,8 @@ data.raw["gui-style"].default["recexplo_title_lst"] = {
 	font = "recexplo_mb",
 	font_color = {r=1, g=1, b=1},
 	single_line = false,
-	top_padding = 3,
+	top_padding = -1,
+	bottom_padding = -4,
 	maximal_width = 108
 }
 data.raw["gui-style"].default["recexplo_label_stats"] = {
@@ -342,13 +344,6 @@ data.raw["gui-style"].default["recexplo_table"] = {
 	parent = "table",
 
 	horizontal_spacing = 0,
-	vertical_spacing = 0
-}
-data.raw["gui-style"].default["recexplo_recipe_table"] = {
-	type = "table_style",
-	parent = "table",
-
-	horizontal_spacing = 3,
-	vertical_spacing = 3
+	vertical_spacing = 0,
 }
 

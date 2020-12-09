@@ -125,8 +125,7 @@ function recexplo.cal_gui.tray_add_recipe(event, product_name, insert_mode)
 	--game.print("cal_gui.tray_add_recipe")
 	local player_index = event.player_index
 	
-	--game.print("event.element.parent.parent.parent.name: " .. event.element.parent.parent.parent.name)
-	local recipe_name = string.sub(event.element.parent.parent.parent.name, string.len(recexplo.prefix_recipe_frame) + 1)
+	local recipe_name = string.sub(event.element.parent.parent.parent.parent.name, string.len(recexplo.prefix_recipe_frame) + 1)
 	local recipe = game.recipe_prototypes[recipe_name]
 
 	if global[player_index].cal_gui.is_recording then
